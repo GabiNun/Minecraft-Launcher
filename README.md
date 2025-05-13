@@ -8,7 +8,7 @@ A lightweight Minecraft launcher built in C++.
 
 ### 1. Install Dependencies
 
-Make sure you have **Installed** Mingw with: `curl`
+Install **MinGW** and the required tools:
 
 ```bash
 pacman -S mingw-w64-x86_64-gcc
