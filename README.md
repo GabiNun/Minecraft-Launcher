@@ -54,7 +54,7 @@ You can download the latest precompiled `.exe` here:
 ## 📦 Requirements to Run
 
 - ✅ **Java 25** or lower installed on your system  
-- ✅ `cacert.pem` file (needed for login, but **not** required to Complie or Play)
+- ✅ `cacert.pem` file (needed for login, but **not** required to Complie)
 - 💡 **Tip:** You may delete all files **except** `cacert.pem` And `Launcher.exe`.
 
 ---
