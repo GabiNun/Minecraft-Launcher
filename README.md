@@ -8,9 +8,10 @@ A lightweight Minecraft launcher built in C++.
 
 ### 1. Install Dependencies
 
-Make sure you have **MinGW-w64** installed. Then, install `curl` with:
+Make sure you have **Installed** Mingw with: `curl`
 
 ```bash
+pacman -S mingw-w64-x86_64-gcc
 pacman -Syu mingw-w64-x86_64-curl
 ```
 
