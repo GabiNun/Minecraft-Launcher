@@ -1,4 +1,4 @@
-# 🟩 Minecraft Launcher
+# 🌳 Minecraft Launcher
 
 A lightweight Minecraft launcher built in C++.
 
