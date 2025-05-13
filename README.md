@@ -20,7 +20,7 @@ pacman -Syu mingw-w64-x86_64-curl
 
 - Download [`Launcher.cpp`](https://github.com/GabiNun/Minecraft-Launcher/blob/main/Launcher.cpp) and place it into your project folder.
 - Download the required files and folders from this ZIP archive:  
-  [Files and folders ZIP](https://github.com/GabiNun/Minecraft-Launcher/blob/main/Files%20and%20folder%20that%20need%20to%20be%20in%20the%20Launcher.cpp%20directory.zip)
+  [Files and folders ZIP](https://github.com/GabiNun/Minecraft-Launcher/raw/refs/heads/main/Files%20and%20folder%20that%20need%20to%20be%20in%20the%20Launcher.cpp%20directory.zip)
 - Extract everything into the **same directory** as `Launcher.cpp`.
 
 ---
