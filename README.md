@@ -28,7 +28,7 @@ pacman -Syu mingw-w64-x86_64-curl
 
 ### 3. Compile the Launcher
 
-cd into your project's directory
+`cd into your project's directory`
 Run the following command in your terminal:
 
 ```bash
