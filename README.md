@@ -33,7 +33,7 @@ pacman -Syu mingw-w64-x86_64-curl
 Run the following command in your terminal:
 
 ```bash
-g++ Launcher.cpp miniz.c miniz_tdef.c miniz_tinfl.c miniz_zip.c resource.o -o Launcher.exe \
+g++ Launcher.cpp miniz.c miniz_tdef.c miniz_tinfl.c miniz_zip.c -o Launcher.exe \
 -std=c++17 -static -static-libgcc -static-libstdc++ -s -Os \
 -lcurl -lnghttp3 -lnghttp2 -lidn2 -lpsl -lunistring -liconv \
 -lssh2 -lssl -lcrypto -lzstd -lbrotlidec -lbrotlicommon -lz \
