@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <cstdio>
-#include <stdio.h> // For freopen_s
+#include <stdio.h>
 
 #define CURL_STATICLIB
 #include <curl/curl.h>
