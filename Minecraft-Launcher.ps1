@@ -6,7 +6,7 @@ $librariesDir = "$workDir\libraries"
 $nativesDir = "$workDir\natives"
 $assetsDir = "$workDir\assets"
 $gameDir = "$workDir\game"
-$javaExe = "java.exe" # Use full path if needed
+$javaExe = "java"
 
 # --- Make downloads less verbose ---
 $ProgressPreference = 'SilentlyContinue'
