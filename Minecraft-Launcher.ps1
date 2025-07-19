@@ -117,20 +117,19 @@ if ($needAssets) {
 $libJars = Get-ChildItem -Path $librariesDir -Recurse -Filter *.jar | ForEach-Object { $_.FullName }
 $classpath = ($libJars + $clientJar) -join ";"
 
-# --- Offline arguments ---
-$username = "Player"
-$uuid = "00000000-0000-0000-0000-000000000000"
-$accessToken = "offline"
+$jvmArgs = @(
+    "--enable-native-access=ALL-UNNAMED"
+    "-cp", "$classpath"
+)
 
-# Game args
 $gameArgs = @(
-    "--username", $username,
+    "--username", Player,
     "--version", $version,
     "--gameDir", $gameDir,
     "--assetsDir", $assetsDir,
     "--assetIndex", $assetIndex,
-    "--uuid", $uuid,
-    "--accessToken", $accessToken,
+    "--uuid", 00000000-0000-0000-0000-000000000000,
+    "--accessToken", offline,
     "--userType", "legacy",
     "--versionType", "release"
 )
@@ -144,5 +143,4 @@ if (-not (Get-Command java -ErrorAction SilentlyContinue)) {
 
 # --- Launch Minecraft ---
 Write-Host "Launching Minecraft..."
-& java $mc.mainClass @gameArgs
-# & java @jvmArgs $mc.mainClass @gameArgs
+& java @jvmArgs $mc.mainClass @gameArgs
