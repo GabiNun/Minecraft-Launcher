@@ -122,7 +122,6 @@ $username = "Player"
 $uuid = "00000000-0000-0000-0000-000000000000"
 $accessToken = "offline"
 
-# JVM args (add warning suppression for Java 21+)
 $jvmArgs = @(
     "--enable-native-access=ALL-UNNAMED"
     "--add-opens=java.base/sun.misc=ALL-UNNAMED"
