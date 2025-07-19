@@ -93,7 +93,7 @@ foreach ($asset in $assetData.objects.PSObject.Properties) {
 }
 
 if ($needAssets) {
-    Write-Host "Parsing asset index and downloading assets (skipping sounds and non-en_us languages). This could take a while..."
+    Write-Host "Parsing asset index and downloading assets (skipping sounds and non-en_us languages)."
     foreach ($asset in $assetData.objects.PSObject.Properties) {
         if ($asset.Name -like "minecraft/sounds/*") { continue }
         if ($asset.Name -like "minecraft/lang/*.json" -and $asset.Name -ne "minecraft/lang/en_us.json") { continue }
