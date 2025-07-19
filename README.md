@@ -1,5 +1,5 @@
 ```powershell
-irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Minecraft-Offline.ps1 | iex
+irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Minecraft-Launcher.ps1 | iex
 ```
 # Private Repository
 
