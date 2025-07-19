@@ -13,7 +13,7 @@ $ProgressPreference = 'SilentlyContinue'
 
 # --- Download version JSON if missing ---
 if (!(Test-Path $versionJson)) {
-    Write-Host "Downloading version JSON: $versionJson"
+    Write-Host "Downloading version JSON: $version"
     Invoke-WebRequest -Uri "https://piston-meta.mojang.com/v1/packages/24b08e167c6611f7ad895ae1e8b5258f819184aa/1.21.8.json" -OutFile $versionJson
 }
 
