@@ -1,5 +1,4 @@
 # --- User Configurable ---
-$version = "1.21.8"
 $versionJson = "$env:TEMP\$version.json"
 $workDir = "$env:APPDATA\.minecraft"
 $librariesDir = "$workDir\libraries"
@@ -11,7 +10,7 @@ $ProgressPreference = 'SilentlyContinue'
 
 # --- Download version JSON if missing ---
 if (!(Test-Path $versionJson)) {
-    Write-Host "Downloading version JSON: $version"
+    Write-Host "Downloading version JSON: 1.21.8"
     Invoke-WebRequest -Uri "https://piston-meta.mojang.com/v1/packages/24b08e167c6611f7ad895ae1e8b5258f819184aa/1.21.8.json" -OutFile $versionJson
 }
 
@@ -102,7 +101,7 @@ $jvmArgs = @(
 
 $gameArgs = @(
     "--username", Player,
-    "--version", $version,
+    "--version", 1.21.8,
     "--gameDir", $gameDir,
     "--assetsDir", $assetsDir,
     "--assetIndex", $assetIndex,
