@@ -75,7 +75,7 @@ if (!(Test-Path $assetIndexFile)) {
     Invoke-WebRequest -Uri $assetIndexUrl -OutFile $assetIndexFile
 }
 
-# --- Improved: Only print asset download message if missing assets ---
+# --- Only print asset download message if missing assets ---
 $assetData = Get-Content $assetIndexFile | ConvertFrom-Json
 
 # Pre-check for missing assets (skipping sounds and non-en_us languages)
@@ -112,8 +112,6 @@ if ($needAssets) {
             }
         }
     }
-} else {
-    Write-Host "All relevant assets are present. No downloads needed."
 }
 
 # --- Build classpath ---
