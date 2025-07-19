@@ -3,7 +3,6 @@ $version = "1.21.8"
 $versionJson = "$env:TEMP\$version.json"
 $workDir = "$env:APPDATA\.minecraft"
 $librariesDir = "$workDir\libraries"
-$nativesDir = "$workDir\natives"
 $assetsDir = "$workDir\assets"
 $gameDir = "$workDir\game"
 
@@ -40,27 +39,6 @@ foreach ($lib in $mc.libraries) {
         if (!(Test-Path $libPath)) {
             Write-Host "Downloading library: $($artifact.path)"
             Invoke-WebRequest -Uri $artifact.url -OutFile $libPath
-        }
-    }
-    # Download natives for Windows
-    if ($lib.PSObject.Properties.Name -contains "downloads" -and $lib.downloads.PSObject.Properties.Name -contains "classifiers") {
-        $nativeNames = @("natives-windows", "natives-windows-x86", "natives-windows-arm64")
-        foreach ($nativeName in $nativeNames) {
-            $classifier = $lib.downloads.classifiers.$nativeName
-            if ($null -ne $classifier) {
-                $nativePath = Join-Path $librariesDir $classifier.path
-                $nativeDir = Split-Path $nativePath -Parent
-                if (!(Test-Path $nativeDir)) { New-Item -ItemType Directory -Path $nativeDir -Force | Out-Null }
-                if (!(Test-Path $nativePath)) {
-                    Write-Host "Downloading native: $($classifier.path)"
-                    Invoke-WebRequest -Uri $classifier.url -OutFile $nativePath
-                }
-                # Create natives directory if needed
-                if (!(Test-Path $nativesDir)) { New-Item -ItemType Directory -Path $nativesDir -Force | Out-Null }
-                # Extract natives
-                Add-Type -AssemblyName System.IO.Compression.FileSystem
-                [System.IO.Compression.ZipFile]::ExtractToDirectory($nativePath, $nativesDir, $true)
-            }
         }
     }
 }
