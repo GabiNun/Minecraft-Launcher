@@ -75,12 +75,14 @@ if (!(Test-Path $assetIndexFile)) {
     Invoke-WebRequest -Uri $assetIndexUrl -OutFile $assetIndexFile
 }
 
-# --- Download assets, skipping sounds ---
-Write-Host "Parsing asset index and downloading assets (skipping sounds). This could take a while..."
+# --- Download assets, skipping sounds and non-en_us languages ---
+Write-Host "Parsing asset index and downloading assets (skipping sounds and non-en_us languages). This could take a while..."
 $assetData = Get-Content $assetIndexFile | ConvertFrom-Json
 foreach ($asset in $assetData.objects.PSObject.Properties) {
     # Skip sound files
     if ($asset.Name -like "minecraft/sounds/*") { continue }
+    # Only download en_us language file, skip others
+    if ($asset.Name -like "minecraft/lang/*.json" -and $asset.Name -ne "minecraft/lang/en_us.json") { continue }
 
     $hash = $asset.Value.hash
     $sub = $hash.Substring(0,2)
