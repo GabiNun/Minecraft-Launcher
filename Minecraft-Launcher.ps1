@@ -122,12 +122,6 @@ $username = "Player"
 $uuid = "00000000-0000-0000-0000-000000000000"
 $accessToken = "offline"
 
-$jvmArgs = @(
-    "--enable-native-access=ALL-UNNAMED"
-    "--add-opens=java.base/sun.misc=ALL-UNNAMED"
-    "-cp", "$classpath"
-)
-
 # Game args
 $gameArgs = @(
     "--username", $username,
@@ -150,4 +144,5 @@ if (-not (Get-Command java -ErrorAction SilentlyContinue)) {
 
 # --- Launch Minecraft ---
 Write-Host "Launching Minecraft..."
-& java @jvmArgs $mc.mainClass @gameArgs
+& java $mc.mainClass @gameArgs
+# & java @jvmArgs $mc.mainClass @gameArgs
