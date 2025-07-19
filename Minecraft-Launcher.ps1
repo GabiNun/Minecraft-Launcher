@@ -5,9 +5,7 @@ $workDir = "$env:APPDATA\.minecraft"
 $librariesDir = "$workDir\libraries"
 $assetsDir = "$workDir\assets"
 $gameDir = "$workDir\game"
-$javaExe = "java"
 
-# --- Make downloads less verbose ---
 $ProgressPreference = 'SilentlyContinue'
 
 # --- Download version JSON if missing ---
@@ -16,7 +14,7 @@ if (!(Test-Path $versionJson)) {
     Invoke-WebRequest -Uri "https://piston-meta.mojang.com/v1/packages/24b08e167c6611f7ad895ae1e8b5258f819184aa/1.21.8.json" -OutFile $versionJson
 }
 
-# --- Prepare Directories (don't create natives yet) ---
+# --- Prepare Directories ---
 New-Item -ItemType Directory -Force -Path $librariesDir, $assetsDir, $gameDir | Out-Null
 New-Item -ItemType Directory -Force -Path "$assetsDir\indexes", "$assetsDir\objects" | Out-Null
 
@@ -100,7 +98,6 @@ $classpath = ($libJars + $clientJar) -join ";"
 $username = "Player"
 $uuid = "00000000-0000-0000-0000-000000000000"
 $accessToken = "offline"
-$mainClass = $mc.mainClass
 
 # JVM args (add warning suppression for Java 21+)
 $jvmArgs = @(
@@ -130,4 +127,4 @@ if (-not (Get-Command java -ErrorAction SilentlyContinue)) {
 
 # --- Launch Minecraft ---
 Write-Host "Launching Minecraft..."
-& $javaExe @jvmArgs $mainClass @gameArgs
+& java @jvmArgs $mc.mainClass @gameArgs
