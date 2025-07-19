@@ -6,7 +6,6 @@ $librariesDir = "$workDir\libraries"
 $nativesDir = "$workDir\natives"
 $assetsDir = "$workDir\assets"
 $gameDir = "$workDir\game"
-$javaExe = "java"
 
 # --- Make downloads less verbose ---
 $ProgressPreference = 'SilentlyContinue'
@@ -122,7 +121,6 @@ $classpath = ($libJars + $clientJar) -join ";"
 $username = "Player"
 $uuid = "00000000-0000-0000-0000-000000000000"
 $accessToken = "offline"
-$mainClass = $mc.mainClass
 
 # JVM args (add warning suppression for Java 21+)
 $jvmArgs = @(
@@ -153,4 +151,4 @@ if (-not (Get-Command java -ErrorAction SilentlyContinue)) {
 
 # --- Launch Minecraft ---
 Write-Host "Launching Minecraft..."
-& $javaExe @jvmArgs $mainClass @gameArgs
+& java @jvmArgs $mc.mainClass @gameArgs
