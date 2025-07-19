@@ -132,4 +132,4 @@ $gameArgs = @(
 
 # --- Launch Minecraft ---
 Write-Host "Launching Minecraft..."
-Start-Process -NoNewWindow -Wait -FilePath $javaExe -ArgumentList ($jvmArgs + $mainClass + $gameArgs)
+& $javaExe @jvmArgs $mainClass @gameArgs
