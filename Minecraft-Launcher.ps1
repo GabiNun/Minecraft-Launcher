@@ -27,7 +27,7 @@ If (!(Test-Path $clientJar)) {
     Invoke-WebRequest -Uri $mc.downloads.client.url -OutFile $clientJar
 }
 
-# --- Download libraries & natives ---
+# --- Download libraries ---
 foreach ($lib in $mc.libraries) {
     $artifact = $lib.downloads.artifact
     if ($null -ne $artifact) {
@@ -98,13 +98,11 @@ $username = "Player"
 $uuid = "00000000-0000-0000-0000-000000000000"
 $accessToken = "offline"
 
-# JVM args (add warning suppression for Java 21+)
 $jvmArgs = @(
     "--enable-native-access=ALL-UNNAMED"
     "-cp", "$classpath"
 )
 
-# Game args
 $gameArgs = @(
     "--username", $username,
     "--version", $version,
@@ -124,6 +122,5 @@ if (-not (Get-Command java -ErrorAction SilentlyContinue)) {
     Remove-Item "$env:TEMP\jdk-24-installer.msi"
 }
 
-# --- Launch Minecraft ---
 Write-Host "Launching Minecraft..."
 & java @jvmArgs $mc.mainClass @gameArgs
