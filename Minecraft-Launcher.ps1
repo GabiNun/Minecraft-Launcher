@@ -116,10 +116,7 @@ $gameArgs = @(
 )
 
 if (-not (Get-Command java -ErrorAction SilentlyContinue)) {
-    Write-Output "Java is not installed. Installing Java 24..."
-    Invoke-WebRequest -Uri "https://download.oracle.com/java/24/latest/jdk-24_windows-x64_bin.msi" -OutFile "$env:TEMP\jdk-24-installer.msi"
-    Start-Process msiexec.exe -ArgumentList "/i `"$env:TEMP\jdk-24-installer.msi`" /qn /norestart" -Wait
-    Remove-Item "$env:TEMP\jdk-24-installer.msi"
+    Write-Output "Java is not installed. Please install java 24"
 }
 
 Write-Host "Launching Minecraft..."
