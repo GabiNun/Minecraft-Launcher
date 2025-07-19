@@ -1,16 +1,18 @@
 # --- User Configurable ---
+$version = "1.21.8"
 $versionJson = "$env:TEMP\$version.json"
 $workDir = "$env:APPDATA\.minecraft"
 $librariesDir = "$workDir\libraries"
 $assetsDir = "$workDir\assets"
 $gameDir = "$workDir\game"
+$javaExe = "java"
 
 # --- Make downloads less verbose ---
 $ProgressPreference = 'SilentlyContinue'
 
 # --- Download version JSON if missing ---
 if (!(Test-Path $versionJson)) {
-    Write-Host "Downloading version JSON: 1.21.8"
+    Write-Host "Downloading version JSON: $version"
     Invoke-WebRequest -Uri "https://piston-meta.mojang.com/v1/packages/24b08e167c6611f7ad895ae1e8b5258f819184aa/1.21.8.json" -OutFile $versionJson
 }
 
@@ -94,19 +96,27 @@ if ($needAssets) {
 $libJars = Get-ChildItem -Path $librariesDir -Recurse -Filter *.jar | ForEach-Object { $_.FullName }
 $classpath = ($libJars + $clientJar) -join ";"
 
+# --- Offline arguments ---
+$username = "Player"
+$uuid = "00000000-0000-0000-0000-000000000000"
+$accessToken = "offline"
+$mainClass = $mc.mainClass
+
+# JVM args (add warning suppression for Java 21+)
 $jvmArgs = @(
     "--enable-native-access=ALL-UNNAMED"
     "-cp", "$classpath"
 )
 
+# Game args
 $gameArgs = @(
-    "--username", Player,
-    "--version", 1.21.8,
+    "--username", $username,
+    "--version", $version,
     "--gameDir", $gameDir,
     "--assetsDir", $assetsDir,
     "--assetIndex", $assetIndex,
-    "--uuid", 00000000-0000-0000-0000-000000000000,
-    "--accessToken", offline,
+    "--uuid", $uuid,
+    "--accessToken", $accessToken,
     "--userType", "legacy",
     "--versionType", "release"
 )
@@ -120,4 +130,4 @@ if (-not (Get-Command java -ErrorAction SilentlyContinue)) {
 
 # --- Launch Minecraft ---
 Write-Host "Launching Minecraft..."
-& java @jvmArgs $mc.mainClass @gameArgs
+& $javaExe @jvmArgs $mainClass @gameArgs
