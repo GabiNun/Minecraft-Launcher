@@ -17,8 +17,8 @@ if (!(Test-Path $versionJson)) {
     Invoke-WebRequest -Uri "https://piston-meta.mojang.com/v1/packages/24b08e167c6611f7ad895ae1e8b5258f819184aa/1.21.8.json" -OutFile $versionJson
 }
 
-# --- Prepare Directories ---
-New-Item -ItemType Directory -Force -Path $librariesDir, $nativesDir, $assetsDir, $gameDir | Out-Null
+# --- Prepare Directories (don't create natives yet) ---
+New-Item -ItemType Directory -Force -Path $librariesDir, $assetsDir, $gameDir | Out-Null
 New-Item -ItemType Directory -Force -Path "$assetsDir\indexes", "$assetsDir\objects" | Out-Null
 
 # --- Read Version JSON ---
@@ -56,6 +56,8 @@ foreach ($lib in $mc.libraries) {
                     Write-Host "Downloading native: $($classifier.path)"
                     Invoke-WebRequest -Uri $classifier.url -OutFile $nativePath
                 }
+                # Create natives directory if needed
+                if (!(Test-Path $nativesDir)) { New-Item -ItemType Directory -Path $nativesDir -Force | Out-Null }
                 # Extract natives
                 Add-Type -AssemblyName System.IO.Compression.FileSystem
                 [System.IO.Compression.ZipFile]::ExtractToDirectory($nativePath, $nativesDir, $true)
