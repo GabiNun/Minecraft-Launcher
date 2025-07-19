@@ -75,29 +75,45 @@ if (!(Test-Path $assetIndexFile)) {
     Invoke-WebRequest -Uri $assetIndexUrl -OutFile $assetIndexFile
 }
 
-# --- Download assets, skipping sounds and non-en_us languages ---
-Write-Host "Parsing asset index and downloading assets (skipping sounds and non-en_us languages). This could take a while..."
+# --- Improved: Only print asset download message if missing assets ---
 $assetData = Get-Content $assetIndexFile | ConvertFrom-Json
-foreach ($asset in $assetData.objects.PSObject.Properties) {
-    # Skip sound files
-    if ($asset.Name -like "minecraft/sounds/*") { continue }
-    # Only download en_us language file, skip others
-    if ($asset.Name -like "minecraft/lang/*.json" -and $asset.Name -ne "minecraft/lang/en_us.json") { continue }
 
+# Pre-check for missing assets (skipping sounds and non-en_us languages)
+$needAssets = $false
+foreach ($asset in $assetData.objects.PSObject.Properties) {
+    if ($asset.Name -like "minecraft/sounds/*") { continue }
+    if ($asset.Name -like "minecraft/lang/*.json" -and $asset.Name -ne "minecraft/lang/en_us.json") { continue }
     $hash = $asset.Value.hash
     $sub = $hash.Substring(0,2)
     $dest = "$assetsDir\objects\$sub\$hash"
     if (!(Test-Path $dest)) {
-        $url = "https://resources.download.minecraft.net/$sub/$hash"
-        $destDir = Split-Path $dest -Parent
-        if (!(Test-Path $destDir)) { New-Item -Path $destDir -ItemType Directory | Out-Null }
-        try {
-            Invoke-WebRequest -Uri $url -OutFile $dest -ErrorAction Stop
-            Write-Host "Downloaded asset: $($asset.Name)"
-        } catch {
-            Write-Warning "Failed to download asset: $($asset.Name) ($url)"
+        $needAssets = $true
+        break
+    }
+}
+
+if ($needAssets) {
+    Write-Host "Parsing asset index and downloading assets (skipping sounds and non-en_us languages). This could take a while..."
+    foreach ($asset in $assetData.objects.PSObject.Properties) {
+        if ($asset.Name -like "minecraft/sounds/*") { continue }
+        if ($asset.Name -like "minecraft/lang/*.json" -and $asset.Name -ne "minecraft/lang/en_us.json") { continue }
+        $hash = $asset.Value.hash
+        $sub = $hash.Substring(0,2)
+        $dest = "$assetsDir\objects\$sub\$hash"
+        if (!(Test-Path $dest)) {
+            $url = "https://resources.download.minecraft.net/$sub/$hash"
+            $destDir = Split-Path $dest -Parent
+            if (!(Test-Path $destDir)) { New-Item -Path $destDir -ItemType Directory | Out-Null }
+            try {
+                Invoke-WebRequest -Uri $url -OutFile $dest -ErrorAction Stop
+                Write-Host "Downloaded asset: $($asset.Name)"
+            } catch {
+                Write-Warning "Failed to download asset: $($asset.Name) ($url)"
+            }
         }
     }
+} else {
+    Write-Host "All relevant assets are present. No downloads needed."
 }
 
 # --- Build classpath ---
