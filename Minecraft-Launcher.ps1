@@ -129,8 +129,6 @@ $jvmArgs = @(
     "--enable-native-access=ALL-UNNAMED"
     "-Djava.library.path=$nativesDir"
     "-cp", "$classpath"
-    "--add-opens", "java.base/sun.misc=ALL-UNNAMED"
-    "--add-exports", "java.base/sun.misc=ALL-UNNAMED"
 )
 
 # Game args
