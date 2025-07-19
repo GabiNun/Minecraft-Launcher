@@ -126,7 +126,6 @@ $accessToken = "offline"
 $jvmArgs = @(
     "--enable-native-access=ALL-UNNAMED"
     "--add-opens=java.base/sun.misc=ALL-UNNAMED"
-    "-Djava.library.path=$nativesDir"
     "-cp", "$classpath"
 )
 
