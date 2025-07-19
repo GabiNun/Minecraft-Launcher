@@ -1,0 +1,134 @@
+# --- User Configurable ---
+$version = "1.21.8"
+$versionJson = "$env:TEMP\$version.json"
+$workDir = "$env:APPDATA\.minecraft"
+$librariesDir = "$workDir\libraries"
+$nativesDir = "$workDir\natives"
+$assetsDir = "$workDir\assets"
+$gameDir = "$workDir\game"
+$javaExe = "java.exe" # Use full path if needed
+
+# --- Make downloads less verbose ---
+$ProgressPreference = 'SilentlyContinue'
+
+# --- Download version JSON if missing ---
+if (!(Test-Path $versionJson)) {
+    Write-Host "Downloading version JSON: $versionJson"
+    Invoke-WebRequest -Uri "https://piston-meta.mojang.com/v1/packages/24b08e167c6611f7ad895ae1e8b5258f819184aa/1.21.8.json" -OutFile $versionJson
+}
+
+# --- Prepare Directories ---
+New-Item -ItemType Directory -Force -Path $librariesDir, $nativesDir, $assetsDir, $gameDir | Out-Null
+New-Item -ItemType Directory -Force -Path "$assetsDir\indexes", "$assetsDir\objects" | Out-Null
+
+# --- Read Version JSON ---
+$mc = Get-Content $versionJson | ConvertFrom-Json
+
+# --- Download client.jar ---
+$clientJar = "$workDir\client.jar"
+If (!(Test-Path $clientJar)) {
+    Write-Host "Downloading client.jar..."
+    Invoke-WebRequest -Uri $mc.downloads.client.url -OutFile $clientJar
+}
+
+# --- Download libraries & natives ---
+foreach ($lib in $mc.libraries) {
+    $artifact = $lib.downloads.artifact
+    if ($null -ne $artifact) {
+        $libPath = Join-Path $librariesDir $artifact.path
+        $libDir = Split-Path $libPath -Parent
+        if (!(Test-Path $libDir)) { New-Item -ItemType Directory -Path $libDir -Force | Out-Null }
+        if (!(Test-Path $libPath)) {
+            Write-Host "Downloading library: $($artifact.path)"
+            Invoke-WebRequest -Uri $artifact.url -OutFile $libPath
+        }
+    }
+    # Download natives for Windows
+    if ($lib.PSObject.Properties.Name -contains "downloads" -and $lib.downloads.PSObject.Properties.Name -contains "classifiers") {
+        $nativeNames = @("natives-windows", "natives-windows-x86", "natives-windows-arm64")
+        foreach ($nativeName in $nativeNames) {
+            $classifier = $lib.downloads.classifiers.$nativeName
+            if ($null -ne $classifier) {
+                $nativePath = Join-Path $librariesDir $classifier.path
+                $nativeDir = Split-Path $nativePath -Parent
+                if (!(Test-Path $nativeDir)) { New-Item -ItemType Directory -Path $nativeDir -Force | Out-Null }
+                if (!(Test-Path $nativePath)) {
+                    Write-Host "Downloading native: $($classifier.path)"
+                    Invoke-WebRequest -Uri $classifier.url -OutFile $nativePath
+                }
+                # Extract natives
+                Add-Type -AssemblyName System.IO.Compression.FileSystem
+                [System.IO.Compression.ZipFile]::ExtractToDirectory($nativePath, $nativesDir, $true)
+            }
+        }
+    }
+}
+
+# --- Download Asset Index ---
+$assetIndex = $mc.assetIndex.id
+$assetIndexUrl = $mc.assetIndex.url
+$assetIndexFile = "$assetsDir\indexes\$assetIndex.json"
+if (!(Test-Path $assetIndexFile)) {
+    Write-Host "Downloading asset index..."
+    Invoke-WebRequest -Uri $assetIndexUrl -OutFile $assetIndexFile
+}
+
+# --- Download assets, skipping sounds ---
+Write-Host "Parsing asset index and downloading assets (skipping sounds). This could take a while..."
+$assetData = Get-Content $assetIndexFile | ConvertFrom-Json
+foreach ($asset in $assetData.objects.PSObject.Properties) {
+    # Skip sound files
+    if ($asset.Name -like "minecraft/sounds/*") { continue }
+
+    $hash = $asset.Value.hash
+    $sub = $hash.Substring(0,2)
+    $dest = "$assetsDir\objects\$sub\$hash"
+    if (!(Test-Path $dest)) {
+        $url = "https://resources.download.minecraft.net/$sub/$hash"
+        $destDir = Split-Path $dest -Parent
+        if (!(Test-Path $destDir)) { New-Item -Path $destDir -ItemType Directory | Out-Null }
+        try {
+            Invoke-WebRequest -Uri $url -OutFile $dest -ErrorAction Stop
+            Write-Host "Downloaded asset: $($asset.Name)"
+        } catch {
+            Write-Warning "Failed to download asset: $($asset.Name) ($url)"
+        }
+    }
+}
+
+# --- Build classpath ---
+$libJars = Get-ChildItem -Path $librariesDir -Recurse -Filter *.jar | ForEach-Object { $_.FullName }
+$classpath = ($libJars + $clientJar) -join ";"
+
+# --- Offline arguments ---
+$username = "Player"
+$uuid = "00000000-0000-0000-0000-000000000000"
+$accessToken = "offline"
+$mainClass = $mc.mainClass
+
+# JVM args (add warning suppression for Java 21+)
+$jvmArgs = @(
+    "--enable-native-access=ALL-UNNAMED"
+    "-Djava.library.path=$nativesDir"
+    "-cp", "$classpath"
+)
+
+# Game args
+$gameArgs = @(
+    "--username", $username,
+    "--version", $version,
+    "--gameDir", $gameDir,
+    "--assetsDir", $assetsDir,
+    "--assetIndex", $assetIndex,
+    "--uuid", $uuid,
+    "--accessToken", $accessToken,
+    "--userType", "legacy",
+    "--versionType", "release"
+)
+
+# --- Launch Minecraft ---
+Write-Host "Launching Minecraft..."
+Start-Process -NoNewWindow -Wait -FilePath $javaExe -ArgumentList ($jvmArgs + $mainClass + $gameArgs)
+
+# --- Delete version JSON after use ---
+Remove-Item $versionJson -Force
