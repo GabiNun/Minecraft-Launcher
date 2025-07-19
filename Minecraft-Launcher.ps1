@@ -149,9 +149,6 @@ if (-not (Get-Command java -ErrorAction SilentlyContinue)) {
     Invoke-WebRequest -Uri "https://download.oracle.com/java/24/latest/jdk-24_windows-x64_bin.msi" -OutFile "$env:TEMP\jdk-24-installer.msi"
     Start-Process msiexec.exe -ArgumentList "/i `"$env:TEMP\jdk-24-installer.msi`" /qn /norestart" -Wait
     Remove-Item "$env:TEMP\jdk-24-installer.msi"
-    Write-Output "Java 24 installation completed."
-} else {
-    Write-Output "Java is already installed."
 }
 
 # --- Launch Minecraft ---
