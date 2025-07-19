@@ -4,7 +4,6 @@ $versionJson = "$env:TEMP\$version.json"
 $workDir = "$env:APPDATA\.minecraft"
 $librariesDir = "$workDir\libraries"
 $assetsDir = "$workDir\assets"
-$gameDir = "$workDir\game"
 
 $ProgressPreference = 'SilentlyContinue'
 
@@ -15,7 +14,7 @@ if (!(Test-Path $versionJson)) {
 }
 
 # --- Prepare Directories ---
-New-Item -ItemType Directory -Force -Path $librariesDir, $assetsDir, $gameDir | Out-Null
+New-Item -ItemType Directory -Force -Path $librariesDir, $assetsDir | Out-Null
 New-Item -ItemType Directory -Force -Path "$assetsDir\indexes", "$assetsDir\objects" | Out-Null
 
 # --- Read Version JSON ---
@@ -109,7 +108,7 @@ $jvmArgs = @(
 $gameArgs = @(
     "--username", $username,
     "--version", $version,
-    "--gameDir", $gameDir,
+    "--gameDir", $workDir,
     "--assetsDir", $assetsDir,
     "--assetIndex", $assetIndex,
     "--uuid", $uuid,
