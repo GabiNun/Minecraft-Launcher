@@ -133,6 +133,3 @@ $gameArgs = @(
 # --- Launch Minecraft ---
 Write-Host "Launching Minecraft..."
 Start-Process -NoNewWindow -Wait -FilePath $javaExe -ArgumentList ($jvmArgs + $mainClass + $gameArgs)
-
-# --- Delete version JSON after use ---
-Remove-Item $versionJson -Force
