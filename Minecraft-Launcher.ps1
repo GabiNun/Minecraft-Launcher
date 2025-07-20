@@ -104,7 +104,8 @@ $gameArgs = @(
 )
 
 if (-not (Get-Command java -ErrorAction SilentlyContinue)) {
-    Write-Output "Java is not installed. Please install Java 24"
+    Write-Output "Java is not installed. Please install Java 24 Than ReRun"
+    exit /b
 }
 
 & java @jvmArgs $mc.mainClass @gameArgs
