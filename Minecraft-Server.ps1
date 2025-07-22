@@ -7,4 +7,4 @@ New-Item -ItemType Directory -Path $folderPath -Force
 Invoke-WebRequest -Uri $jarUrl -OutFile $jarPath
 Set-Content -Path $eulaPath -Value "eula=true"
 Set-Location $folderPath
-& java -Xmx8192M -jar "server.jar" nogui
+& java -Xmx8192M -jar server.jar nogui
