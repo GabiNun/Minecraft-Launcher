@@ -27,6 +27,10 @@ foreach ($lib in $versionData.libraries) {
 $assetIndexUrl = $versionData.assetIndex.url
 $assetIndexData = Invoke-RestMethod -Uri $assetIndexUrl
 
+if ($null -eq $assetIndexData.objects) {
+    exit
+}
+
 foreach ($asset in $assetIndexData.objects) {
     $assetName = $asset.Key
     $hash = $asset.Value.hash
@@ -35,12 +39,13 @@ foreach ($asset in $assetIndexData.objects) {
     if ($assetName -like "sounds/*") { continue }
 
     $subFolder = $hash.Substring(0,2)
-    $assetPath = Join-Path $mcPath "assets\objects\$subFolder\$hash"
+    $assetDir = Join-Path $mcPath "assets\objects\$subFolder"
+    if (-not (Test-Path $assetDir)) { New-Item -ItemType Directory -Path $assetDir -Force }
+
+    $assetPath = Join-Path $assetDir $hash
 
     if (-not (Test-Path $assetPath)) {
         $assetUrl = "https://resources.download.minecraft.net/$subFolder/$hash"
-        $assetDir = Split-Path $assetPath
-        if (-not (Test-Path $assetDir)) { New-Item -ItemType Directory -Path $assetDir -Force }
         try {
             Invoke-WebRequest -Uri $assetUrl -OutFile $assetPath -ErrorAction Stop
         }
