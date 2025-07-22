@@ -6,5 +6,4 @@ irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Minecraft-Server.p
 ```
 
 # Private Repository
-
-This repository is private and intended for restricted access only.
+This repository is private and intended for restricted access only
