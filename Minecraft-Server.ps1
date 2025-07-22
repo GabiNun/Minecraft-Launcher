@@ -1,6 +1,6 @@
 $ProgressPreference = 'SilentlyContinue'
 
-New-Item -ItemType Directory "$env:APPDATA\Minecraft Server" -Force
+New-Item -ItemType Directory "$env:APPDATA\Minecraft Server" -Force | Out-Null
 Set-Content -Path "$env:APPDATA\Minecraft Server\eula.txt" -Value "eula=true"
 
 if (-Not (Test-Path "$env:APPDATA\Minecraft Server\server.jar")) {
