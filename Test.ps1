@@ -27,7 +27,7 @@ foreach ($lib in $versionData.libraries) {
     }
 }
 
-foreach ($asset in $assetIndexData.objects.GetEnumerator()) {
+foreach ($asset in $assetIndexData.objects) {
     $assetName = $asset.Key
     $hash = $asset.Value.hash
 
