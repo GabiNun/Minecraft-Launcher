@@ -43,7 +43,7 @@ foreach ($file in $json.objects.PSObject.Properties) {
     }
 }
 
-#$classpathString = [string]::Join(';', (Get-ChildItem "$env:APPDATA\.minecraft\libraries" -Recurse -Filter *.jar | ForEach-Object FullName) + "$env:APPDATA\.minecraft\client.jar")
+$classpathString = [string]::Join(';', (Get-ChildItem "$env:APPDATA\.minecraft\libraries" -Recurse -Filter *.jar | ForEach-Object FullName) + "$env:APPDATA\.minecraft\client.jar")
 
 $args = @(
     "--version", $latestReleaseData.id,
