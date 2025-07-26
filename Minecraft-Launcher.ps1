@@ -11,6 +11,11 @@ if (-not (Test-Path $filePath)) {
     irm $latestReleaseData.downloads.client.url -OutFile $filePath
 }
 
+$indexFilePath = "$env:APPDATA\.minecraft\assets\indexes\$($latestReleaseData.assets).json"
+if (-not (Test-Path $indexFilePath)) {
+    irm $latestReleaseData.assetIndex.url -OutFile $indexFilePath
+}
+
 foreach ($lib in $latestReleaseData.libraries) {
     if ($lib.downloads -and $lib.downloads.artifact) {
         $path = $lib.downloads.artifact.path.ToLower()
