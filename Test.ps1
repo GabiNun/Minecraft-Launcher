@@ -5,7 +5,10 @@ $manifest = irm launchermeta.mojang.com/mc/game/version_manifest.json
 $latestReleaseUrl = ($manifest.versions | ? id -eq $manifest.latest.release).url
 $latestReleaseData = irm $latestReleaseUrl
 
-irm $latestReleaseData.downloads.client.url -OutFile $env:APPDATA\.minecraft\client.jar
+$filePath = "$env:APPDATA\.minecraft\client.jar"
+if (-not (Test-Path $filePath)) {
+    irm $latestReleaseData.downloads.client.url -OutFile $filePath
+}
 
 foreach ($lib in $latestReleaseData.libraries) {
     if ($lib.downloads?.artifact) {
