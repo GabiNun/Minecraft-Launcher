@@ -56,7 +56,7 @@ $args = @(
     "--versionType", "release",
     "--accessToken", "0",
     "--userType", "legacy"
-    "--enable-native-access=ALL-UNNAMED"
+    " --enable-native-access=ALL-UNNAMED"
 )
 
 java -cp $classpathString net.minecraft.client.main.Main $args
