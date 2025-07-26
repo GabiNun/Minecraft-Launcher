@@ -3,16 +3,12 @@ $latestReleaseUrl = ($manifest.versions | ? id -eq $manifest.latest.release).url
 $latestReleaseData = irm $latestReleaseUrl
 
 New-Item "$env:APPDATA\Minecraft Server" -ItemType Directory -Force | Out-Null
+Set-Content -Path "$env:APPDATA\Minecraft Server\eula.txt" -Value "eula=true"
 $ProgressPreference = 'SilentlyContinue'
 
 $filePath = "$env:APPDATA\Minecraft Server\server.jar"
 if (-not (Test-Path $filePath)) {
     irm $latestReleaseData.downloads.server.url -OutFile $filePath
-}
-
-$eulaPath = "$env:APPDATA\Minecraft Server\eula.txt"
-if (-not (Test-Path $eulaPath)) {
-    "eula=true" | Out-File -Encoding ASCII $eulaPath
 }
 
 Set-Location  "$env:APPDATA\Minecraft Server"
