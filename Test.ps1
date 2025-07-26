@@ -23,19 +23,24 @@ foreach ($lib in $latestReleaseData.libraries) {
     }
 }
 
-if (-Not (Test-Path "$env:APPDATA\.minecraft\assets")) {
-    New-Item -ItemType Directory -Path "$env:APPDATA\.minecraft\assets" | Out-Null
+$indexPath = "$env:APPDATA\.minecraft\assets\indexes"
+if (-not (Test-Path $indexPath)) {
+    New-Item -ItemType Directory -Path $indexPath -Force | Out-Null
+}
+$indexFile = "$indexPath\$($latestReleaseData.assets).json"
+if (-not (Test-Path $indexFile)) {
+    irm $latestReleaseData.assetIndex.url -OutFile $indexFile
 }
 
 foreach ($file in $json.objects.PSObject.Properties) {
     if ($file.Name -like "minecraft/sounds*") { continue }
-
     $hash = $file.Value.hash
-    $dest = Join-Path "$env:APPDATA\.minecraft\assets" $file.Name
-    if (-Not (Test-Path $dest)) {
+    $subdir = $hash.Substring(0, 2)
+    $dest = "$env:APPDATA\.minecraft\assets\objects\$subdir\$hash"
+    if (-not (Test-Path $dest)) {
         $dir = Split-Path $dest
-        if (-Not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
-        Invoke-WebRequest -Uri "https://resources.download.minecraft.net/$($hash.Substring(0,2))/$hash" -OutFile $dest
+        if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+        Invoke-WebRequest -Uri "https://resources.download.minecraft.net/$subdir/$hash" -OutFile $dest
         Write-Host "Downloaded $($file.Name)"
     }
 }
