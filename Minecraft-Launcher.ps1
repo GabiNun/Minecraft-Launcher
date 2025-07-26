@@ -1,111 +1,65 @@
-$version = "1.21.8"
-$versionJson = Join-Path $env:TEMP "$version.json"
-$workDir = Join-Path $env:APPDATA ".minecraft"
-$librariesDir = Join-Path $workDir "libraries"
-$assetsDir = Join-Path $workDir "assets"
-$clientJar = Join-Path $workDir "client.jar"
-
+New-Item $env:APPDATA\.minecraft -ItemType Directory -Force | Out-Null
 $ProgressPreference = 'SilentlyContinue'
 
-if (!(Test-Path $versionJson)) {
-    Write-Host "Downloading version JSON: $version"
-    Invoke-WebRequest -Uri "https://piston-meta.mojang.com/v1/packages/24b08e167c6611f7ad895ae1e8b5258f819184aa/1.21.8.json" -OutFile $versionJson
+$manifest = irm launchermeta.mojang.com/mc/game/version_manifest.json
+$latestReleaseUrl = ($manifest.versions | ? id -eq $manifest.latest.release).url
+$latestReleaseData = irm $latestReleaseUrl
+$json = irm $latestReleaseData.assetIndex.url
+
+$filePath = "$env:APPDATA\.minecraft\client.jar"
+if (-not (Test-Path $filePath)) {
+    irm $latestReleaseData.downloads.client.url -OutFile $filePath
 }
 
-New-Item -ItemType Directory -Force -Path $librariesDir, $assetsDir, (Join-Path $assetsDir "indexes"), (Join-Path $assetsDir "objects") | Out-Null
-
-$mc = Get-Content $versionJson | ConvertFrom-Json
-
-if (!(Test-Path $clientJar)) {
-    Write-Host "Downloading client.jar..."
-    Invoke-WebRequest -Uri $mc.downloads.client.url -OutFile $clientJar
-}
-
-foreach ($lib in $mc.libraries) {
-    $artifact = $lib.downloads.artifact
-    if ($null -ne $artifact) {
-        $libPath = Join-Path $librariesDir $artifact.path
-        $libDir = Split-Path $libPath -Parent
-        New-Item -ItemType Directory -Path $libDir -Force | Out-Null
-        if (!(Test-Path $libPath)) {
-            Write-Host "Downloading library: $($artifact.path)"
-            Invoke-WebRequest -Uri $artifact.url -OutFile $libPath
+foreach ($lib in $latestReleaseData.libraries) {
+    if ($lib.downloads -and $lib.downloads.artifact) {
+        $path = $lib.downloads.artifact.path.ToLower()
+        $skip = ($lib.rules -and ($lib.rules | Where-Object { $_.os -and ($_.os.name -match 'linux|macos|arm64') })) -or ($path -match 'linux|macos|arm64')
+        if (-not $skip) {
+            $file = Join-Path $env:APPDATA ".minecraft\libraries\$($lib.downloads.artifact.path)"
+            if (-not (Test-Path (Split-Path $file))) { New-Item -ItemType Directory -Path (Split-Path $file) -Force | Out-Null }
+            if (-not (Test-Path $file)) { irm $lib.downloads.artifact.url -OutFile $file; Write-Host "Downloaded $($lib.downloads.artifact.path)" }
         }
     }
 }
 
-$assetIndex = $mc.assetIndex.id
-$assetIndexUrl = $mc.assetIndex.url
-$assetIndexFile = Join-Path (Join-Path $assetsDir "indexes") "$assetIndex.json"
-
-if (!(Test-Path $assetIndexFile)) {
-    Write-Host "Downloading asset index..."
-    Invoke-WebRequest -Uri $assetIndexUrl -OutFile $assetIndexFile
+$indexPath = "$env:APPDATA\.minecraft\assets\indexes"
+if (-not (Test-Path $indexPath)) {
+    New-Item -ItemType Directory -Path $indexPath -Force | Out-Null
+}
+$indexFile = "$indexPath\$($latestReleaseData.assets).json"
+if (-not (Test-Path $indexFile)) {
+    irm $latestReleaseData.assetIndex.url -OutFile $indexFile
 }
 
-$assetData = Get-Content $assetIndexFile | ConvertFrom-Json
-
-$needAssets = $false
-foreach ($asset in $assetData.objects.PSObject.Properties) {
-    if ($asset.Name -like "minecraft/sounds/*") { continue }
-    if ($asset.Name -like "minecraft/lang/*.json" -and $asset.Name -ne "minecraft/lang/en_us.json") { continue }
-    $hash = $asset.Value.hash
-    $dest = Join-Path $assetsDir "objects\$($hash.Substring(0,2))\$hash"
-    if (!(Test-Path $dest)) {
-        $needAssets = $true
-        break
+foreach ($file in $json.objects.PSObject.Properties) {
+    $path = $file.Name
+    if ($path -like "minecraft/sounds*") { continue }
+    if ($path -like "minecraft/lang/*.json" -and -not $path.EndsWith("en_us.json")) { continue }
+    $hash = $file.Value.hash
+    $subdir = $hash.Substring(0, 2)
+    $dest = "$env:APPDATA\.minecraft\assets\objects\$subdir\$hash"
+    if (-not (Test-Path $dest)) {
+        $dir = Split-Path $dest
+        if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+        Invoke-WebRequest -Uri "https://resources.download.minecraft.net/$subdir/$hash" -OutFile $dest
+        Write-Host "Downloaded $path"
     }
 }
 
-if ($needAssets) {
-    Write-Host "Parsing asset index and downloading assets (skipping sounds and non-en_us languages)."
-    foreach ($asset in $assetData.objects.PSObject.Properties) {
-        if ($asset.Name -like "minecraft/sounds/*") { continue }
-        if ($asset.Name -like "minecraft/lang/*.json" -and $asset.Name -ne "minecraft/lang/en_us.json") { continue }
-        $hash = $asset.Value.hash
-        $sub = $hash.Substring(0,2)
-        $dest = Join-Path $assetsDir "objects\$sub\$hash"
-        if (!(Test-Path $dest)) {
-            $url = "https://resources.download.minecraft.net/$sub/$hash"
-            $destDir = Split-Path $dest -Parent
-            New-Item -Path $destDir -ItemType Directory -Force | Out-Null
-            try {
-                Invoke-WebRequest -Uri $url -OutFile $dest -ErrorAction Stop
-                Write-Host "Downloaded asset: $($asset.Name)"
-            } catch {
-                Write-Warning "Failed to download asset: $($asset.Name) ($url)"
-            }
-        }
-    }
-}
+$classPath = (Get-ChildItem -Path "$env:APPDATA\.minecraft\libraries" -Recurse -Filter *.jar | ForEach-Object { $_.FullName }) + "$env:APPDATA\.minecraft\client.jar"
+$classpathString = $classPath -join ';'
 
-$libJars = Get-ChildItem -Path $librariesDir -Recurse -Filter *.jar | ForEach-Object { $_.FullName }
-$classpath = ($libJars + $clientJar) -join ";"
-
-$username = "Player"
-$uuid = "00000000-0000-0000-0000-000000000000"
-$accessToken = "offline"
-
-$jvmArgs = @(
-    "--enable-native-access=ALL-UNNAMED"
-    "-cp", $classpath
+$args = @(
+    "--version", $latestReleaseData.id,
+    "--gameDir", "$env:APPDATA\.minecraft",
+    "--assetsDir", "$env:APPDATA\.minecraft\assets",
+    "--assetIndex", $latestReleaseData.assets,
+    "--uuid", "00000000-0000-0000-0000-000000000000",
+    "--username", "Player",
+    "--versionType", "release",
+    "--accessToken", "0",
+    "--userType", "legacy"
 )
 
-$gameArgs = @(
-    "--username", $username,
-    "--version", $version,
-    "--gameDir", $workDir,
-    "--assetsDir", $assetsDir,
-    "--assetIndex", $assetIndex,
-    "--uuid", $uuid,
-    "--accessToken", $accessToken,
-    "--userType", "legacy",
-    "--versionType", "release"
-)
-
-if (-not (Get-Command java -ErrorAction SilentlyContinue)) {
-    Write-Output "Java is not installed. Please install Java 24 Than ReRun"
-    exit /b
-}
-
-& java @jvmArgs $mc.mainClass @gameArgs
+java -cp $classpathString net.minecraft.client.main.Main $args
