@@ -33,7 +33,9 @@ if (-not (Test-Path $indexFile)) {
 }
 
 foreach ($file in $json.objects.PSObject.Properties) {
-    if ($file.Name -like "minecraft/sounds*") { continue }
+    $path = $file.Name
+    if ($path -like "minecraft/sounds*") { continue }
+    if ($path -like "minecraft/lang/*.json" -and -not $path.EndsWith("en_us.json")) { continue }
     $hash = $file.Value.hash
     $subdir = $hash.Substring(0, 2)
     $dest = "$env:APPDATA\.minecraft\assets\objects\$subdir\$hash"
@@ -41,7 +43,7 @@ foreach ($file in $json.objects.PSObject.Properties) {
         $dir = Split-Path $dest
         if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
         Invoke-WebRequest -Uri "https://resources.download.minecraft.net/$subdir/$hash" -OutFile $dest
-        Write-Host "Downloaded $($file.Name)"
+        Write-Host "Downloaded $path"
     }
 }
 
