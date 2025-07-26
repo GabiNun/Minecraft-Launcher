@@ -22,6 +22,39 @@ foreach ($lib in $latestReleaseData.libraries) {
     }
 }
 
+$jsonUrl = "https://piston-meta.mojang.com/v1/packages/7eb8873392fc365779dbfea6e2c28fca30a6c6cd/26.json"
+$assetsFolder = "assets"
+
+if (-Not (Test-Path $assetsFolder)) {
+    New-Item -ItemType Directory -Path $assetsFolder | Out-Null
+}
+
+$json = Invoke-RestMethod -Uri $jsonUrl
+
+foreach ($file in $json.objects.PSObject.Properties) {
+    $relativePath = $file.Name
+
+    if ($relativePath -like "minecraft/sounds*") {
+        continue
+    }
+
+    $hash = $file.Value.hash
+    $firstTwo = $hash.Substring(0, 2)
+    $downloadUrl = "https://resources.download.minecraft.net/$firstTwo/$hash"
+
+    $destinationPath = Join-Path $assetsFolder $relativePath
+    $destinationDir = Split-Path $destinationPath
+
+    if (-Not (Test-Path $destinationDir)) {
+        New-Item -ItemType Directory -Path $destinationDir -Force | Out-Null
+    }
+
+    if (-Not (Test-Path $destinationPath)) {
+        Invoke-WebRequest -Uri $downloadUrl -OutFile $destinationPath
+        Write-Host "Downloaded $relativePath"
+    }
+}
+
 $classPath = (Get-ChildItem -Path "$env:APPDATA\.minecraft\libraries" -Recurse -Filter *.jar | ForEach-Object { $_.FullName }) + "$env:APPDATA\.minecraft\client.jar"
 $classpathString = $classPath -join ';'
 
