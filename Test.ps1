@@ -4,6 +4,7 @@ $ProgressPreference = 'SilentlyContinue'
 $manifest = irm launchermeta.mojang.com/mc/game/version_manifest.json
 $latestReleaseUrl = ($manifest.versions | ? id -eq $manifest.latest.release).url
 $latestReleaseData = irm $latestReleaseUrl
+$json = irm $latestReleaseData.assetIndex.url
 
 $filePath = "$env:APPDATA\.minecraft\client.jar"
 if (-not (Test-Path $filePath)) {
@@ -22,36 +23,20 @@ foreach ($lib in $latestReleaseData.libraries) {
     }
 }
 
-$jsonUrl = "https://piston-meta.mojang.com/v1/packages/7eb8873392fc365779dbfea6e2c28fca30a6c6cd/26.json"
-$assetsFolder = "assets"
-
-if (-Not (Test-Path $assetsFolder)) {
-    New-Item -ItemType Directory -Path $assetsFolder | Out-Null
+if (-Not (Test-Path "$env:APPDATA\.minecraft\assets")) {
+    New-Item -ItemType Directory -Path "$env:APPDATA\.minecraft\assets" | Out-Null
 }
 
-$json = Invoke-RestMethod -Uri $jsonUrl
-
 foreach ($file in $json.objects.PSObject.Properties) {
-    $relativePath = $file.Name
-
-    if ($relativePath -like "minecraft/sounds*") {
-        continue
-    }
+    if ($file.Name -like "minecraft/sounds*") { continue }
 
     $hash = $file.Value.hash
-    $firstTwo = $hash.Substring(0, 2)
-    $downloadUrl = "https://resources.download.minecraft.net/$firstTwo/$hash"
-
-    $destinationPath = Join-Path $assetsFolder $relativePath
-    $destinationDir = Split-Path $destinationPath
-
-    if (-Not (Test-Path $destinationDir)) {
-        New-Item -ItemType Directory -Path $destinationDir -Force | Out-Null
-    }
-
-    if (-Not (Test-Path $destinationPath)) {
-        Invoke-WebRequest -Uri $downloadUrl -OutFile $destinationPath
-        Write-Host "Downloaded $relativePath"
+    $dest = Join-Path "$env:APPDATA\.minecraft\assets" $file.Name
+    if (-Not (Test-Path $dest)) {
+        $dir = Split-Path $dest
+        if (-Not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+        Invoke-WebRequest -Uri "https://resources.download.minecraft.net/$($hash.Substring(0,2))/$hash" -OutFile $dest
+        Write-Host "Downloaded $($file.Name)"
     }
 }
 
