@@ -18,3 +18,20 @@ foreach ($lib in $latestReleaseData.libraries) {
         }
     }
 }
+
+$classPath = (Get-ChildItem -Path "$env:APPDATA\.minecraft\libraries" -Recurse -Filter *.jar | ForEach-Object { $_.FullName }) + "$env:APPDATA\.minecraft\client.jar"
+$classpathString = $classPath -join ';'
+
+$args = @(
+    "--version", $latestReleaseData.id,
+    "--gameDir", "$env:APPDATA\.minecraft",
+    "--assetsDir", "$env:APPDATA\.minecraft\assets",
+    "--assetIndex", $latestReleaseData.assets,
+    "--uuid", "00000000-0000-0000-0000-000000000000",
+    "--username", "Player",
+    "--versionType", "release",
+    "--accessToken", "0",
+    "--userType", "legacy"
+)
+
+java -cp $classpathString net.minecraft.client.main.Main $args
