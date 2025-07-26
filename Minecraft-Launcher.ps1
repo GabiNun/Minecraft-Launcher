@@ -1,4 +1,4 @@
-New-Item $env:APPDATA\.minecraft -ItemType Directory -Force | Out-Null
+New-Item $env:APPDATA\.minecraft\assets\indexes -ItemType Directory -Force | Out-Null
 $ProgressPreference = 'SilentlyContinue'
 
 $manifest = irm launchermeta.mojang.com/mc/game/version_manifest.json
@@ -21,15 +21,6 @@ foreach ($lib in $latestReleaseData.libraries) {
             if (-not (Test-Path $file)) { irm $lib.downloads.artifact.url -OutFile $file; Write-Host "Downloaded $($lib.downloads.artifact.path)" }
         }
     }
-}
-
-$indexPath = "$env:APPDATA\.minecraft\assets\indexes"
-if (-not (Test-Path $indexPath)) {
-    New-Item -ItemType Directory -Path $indexPath -Force | Out-Null
-}
-$indexFile = "$indexPath\$($latestReleaseData.assets).json"
-if (-not (Test-Path $indexFile)) {
-    irm $latestReleaseData.assetIndex.url -OutFile $indexFile
 }
 
 foreach ($file in $json.objects.PSObject.Properties) {
