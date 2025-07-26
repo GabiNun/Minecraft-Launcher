@@ -1,6 +1,6 @@
 irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Downloader.ps1 | iex
 
-$classpathString = [string]::Join(';', (Get-ChildItem "$env:APPDATA\.minecraft\libraries" -Recurse -Filter *.jar | ForEach-Object FullName) + "$env:APPDATA\.minecraft\client.jar")
+$classpathString = "$([string]::Join(';', (gci $env:APPDATA\.minecraft\libraries -r -fi *.jar).FullName));$env:APPDATA\.minecraft\client.jar"
 
 $args = @(
     "--version", $latestReleaseData.id,
