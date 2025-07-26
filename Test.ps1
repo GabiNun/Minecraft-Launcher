@@ -3,6 +3,7 @@ $latestReleaseUrl = ($manifest.versions | ? id -eq $manifest.latest.release).url
 $latestReleaseData = irm $latestReleaseUrl
 
 New-Item "$env:APPDATA\Minecraft Server" -ItemType Directory -Force | Out-Null
+$ProgressPreference = 'SilentlyContinue'
 
 $filePath = "$env:APPDATA\Minecraft Server\server.jar"
 if (-not (Test-Path $filePath)) {
