@@ -11,5 +11,5 @@ if (-not (Test-Path $filePath)) {
     irm $latestRelease.downloads.server.url -OutFile $filePath
 }
 
-Set-Location  "$env:APPDATA\Minecraft Server"
+Set-Location "$env:APPDATA\Minecraft Server"
 & java -jar server.jar nogui
