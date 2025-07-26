@@ -33,7 +33,7 @@ foreach ($file in $json.objects.PSObject.Properties) {
     if (-not (Test-Path $dest)) {
         $dir = Split-Path $dest
         if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
-        Invoke-WebRequest -Uri "https://resources.download.minecraft.net/$subdir/$hash" -OutFile $dest
+        irm -Uri "https://resources.download.minecraft.net/$subdir/$hash" -OutFile $dest
         Write-Host "Downloaded $path"
     }
 }
