@@ -12,9 +12,9 @@ if (-not (Test-Path $filePath)) {
 }
 
 foreach ($lib in $latestReleaseData.libraries) {
-    if ($lib.downloads?.artifact) {
+    if ($lib.downloads -and $lib.downloads.artifact) {
         $path = $lib.downloads.artifact.path.ToLower()
-        $skip = $lib.rules -and ($lib.rules | Where-Object { $_.os -and ($_.os.name -match 'linux|macos|arm64') }) -or ($path -match 'linux|macos|arm64')
+        $skip = ($lib.rules -and ($lib.rules | Where-Object { $_.os -and ($_.os.name -match 'linux|macos|arm64') })) -or ($path -match 'linux|macos|arm64')
         if (-not $skip) {
             $file = Join-Path $env:APPDATA ".minecraft\libraries\$($lib.downloads.artifact.path)"
             if (-not (Test-Path (Split-Path $file))) { New-Item -ItemType Directory -Path (Split-Path $file) -Force | Out-Null }
