@@ -4,5 +4,8 @@ irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Minecraft-Launcher
 ```powershell
 irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Minecraft-Server.ps1 | iex
 ```
+```powershell
+irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Paper-Server.ps1 | iex
+```
 # Private Repository
 This repository is private and intended for restricted access only
