@@ -1,5 +1,5 @@
 New-Item "$env:APPDATA\Minecraft Server" -ItemType Directory -Force | Out-Null
-Set-Content "$env:APPDATA\Minecraft Server\eula.txt" eula=true
+sc "$env:APPDATA\Minecraft Server\eula.txt" eula=true
 $ProgressPreference = 'SilentlyContinue'
 
 $filePath = "$env:APPDATA\Minecraft Server\server.jar"
