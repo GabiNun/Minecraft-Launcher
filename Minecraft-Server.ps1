@@ -7,7 +7,7 @@ $ProgressPreference = 'SilentlyContinue'
 
 $filePath = "$env:APPDATA\Minecraft Server\server.jar"
 if (-not (Test-Path $filePath)) {
-    irm ((irm $latestReleaseUrl).downloads.server.url) -OutFile $filePath
+    irm ((irm $latestReleaseUrl).downloads.server.url) -o $filePath
 }
 
 Set-Location "$env:APPDATA\Minecraft Server"
