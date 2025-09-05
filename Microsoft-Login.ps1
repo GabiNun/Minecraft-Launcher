@@ -1,14 +1,23 @@
 # Microsoft Login Authentication for Minecraft Launcher
 # Outputs: $mcToken, $mcProfile
 
+function Open-Url {
+    param([string]$url)
+    try {
+        Start-Process $url
+    } catch {
+        Write-Host "Couldn't automatically open your browser. Please copy and paste this URL into your browser:" -ForegroundColor Red
+        Write-Host $url -ForegroundColor Yellow
+    }
+}
+
 function Get-Microsoft-Minecraft-Identity {
     $clientId    = "00000000402b5328"
     $redirectUri = "https://login.live.com/oauth20_desktop.srf"
     $scope       = "XboxLive.signin offline_access"
     $authUrl     = "https://login.live.com/oauth20_authorize.srf?client_id=$clientId&response_type=code&redirect_uri=$redirectUri&scope=$scope"
 
-    Write-Host "Open this URL in your browser and log in:" -ForegroundColor Yellow
-    Write-Host $authUrl -ForegroundColor Cyan
+    Open-Url $authUrl
 
     $authCode = Read-Host "`nPaste ONLY the code from the browser's URL after login (the value after 'code=')"
 
