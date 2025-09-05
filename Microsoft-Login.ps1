@@ -1,4 +1,4 @@
-# Microsoft Login Authentication for Minecraft Launcher (Classic "just the code" flow)
+# Microsoft Login Authentication for Minecraft Launcher
 # Outputs: $mcToken, $mcProfile
 
 function Get-Microsoft-Minecraft-Identity {
