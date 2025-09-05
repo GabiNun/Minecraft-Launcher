@@ -1,5 +1,15 @@
-# Microsoft Login Authentication for Minecraft Launcher
+# Microsoft Login Authentication for Minecraft Launcher (Classic "just the code" flow)
 # Outputs: $mcToken, $mcProfile
+
+function Open-Url {
+    param([string]$url)
+    try {
+        Start-Process $url
+    } catch {
+        Write-Host "Couldn't automatically open your browser. Please copy and paste this URL into your browser:" -ForegroundColor Red
+        Write-Host $url -ForegroundColor Yellow
+    }
+}
 
 function Get-Microsoft-Minecraft-Identity {
     $clientId    = "00000000402b5328"
@@ -7,10 +17,9 @@ function Get-Microsoft-Minecraft-Identity {
     $scope       = "XboxLive.signin offline_access"
     $authUrl     = "https://login.live.com/oauth20_authorize.srf?client_id=$clientId&response_type=code&redirect_uri=$redirectUri&scope=$scope"
 
-    Write-Host "Opening Microsoft Login page..." -ForegroundColor Cyan
-    Start-Process $authUrl
+    Open-Url $authUrl
 
-    $authCode = Read-Host "`nPaste the code from the browser's URL after login (the value of 'code=...'):"
+    $authCode = Read-Host "`nPaste ONLY the code from the browser's URL after login (the value after 'code=')"
 
     # Microsoft access token
     $tokenUrl = "https://login.live.com/oauth20_token.srf"
@@ -20,7 +29,6 @@ function Get-Microsoft-Minecraft-Identity {
         grant_type   = "authorization_code"
         redirect_uri = $redirectUri
     }
-    Write-Host "Requesting Microsoft access token..." -ForegroundColor Cyan
     $response = Invoke-RestMethod -Method Post -Uri $tokenUrl -Body $body
     $accessToken = $response.access_token
 
@@ -36,7 +44,6 @@ function Get-Microsoft-Minecraft-Identity {
         TokenType    = "JWT"
     } | ConvertTo-Json
     $xblHeaders = @{ "Content-Type" = "application/json" }
-    Write-Host "Requesting Xbox Live token..." -ForegroundColor Cyan
     $xblResponse = Invoke-RestMethod -Method Post -Uri $xblAuthUrl -Body $xblBody -Headers $xblHeaders
     $xblToken = $xblResponse.Token
 
@@ -51,7 +58,6 @@ function Get-Microsoft-Minecraft-Identity {
         TokenType    = "JWT"
     } | ConvertTo-Json
     $xstsHeaders = @{ "Content-Type" = "application/json" }
-    Write-Host "Requesting XSTS token..." -ForegroundColor Cyan
     $xstsResponse = Invoke-RestMethod -Method Post -Uri $xstsUrl -Body $xstsBody -Headers $xstsHeaders
     $xstsToken = $xstsResponse.Token
     $uhs = $xstsResponse.DisplayClaims.xui[0].uhs
@@ -62,27 +68,20 @@ function Get-Microsoft-Minecraft-Identity {
         identityToken = "XBL3.0 x=$uhs;$xstsToken"
     } | ConvertTo-Json
     $mcHeaders = @{ "Content-Type" = "application/json" }
-    Write-Host "Requesting Minecraft access token..." -ForegroundColor Cyan
     $mcResponse = Invoke-RestMethod -Method Post -Uri $mcLoginUrl -Body $mcBody -Headers $mcHeaders
     $mcToken = $mcResponse.access_token
 
     # Get Minecraft profile
     $mcProfileUrl = "https://api.minecraftservices.com/minecraft/profile"
     $mcProfileHeaders = @{ "Authorization" = "Bearer $mcToken" }
-    Write-Host "Getting Minecraft profile..." -ForegroundColor Cyan
-    try {
-        $mcProfile = Invoke-RestMethod -Method Get -Uri $mcProfileUrl -Headers $mcProfileHeaders
-        Write-Host "`n==== Minecraft Account Info ====" -ForegroundColor Green
-        Write-Host "Username: $($mcProfile.name)"
-        Write-Host "UUID:     $($mcProfile.id)"
-        return @{ token = $mcToken; profile = $mcProfile }
-    } catch {
-        Write-Host "`nFailed to retrieve Minecraft profile. You may not own Minecraft Java Edition." -ForegroundColor Red
-        return $null
-    }
+    $mcProfile = Invoke-RestMethod -Method Get -Uri $mcProfileUrl -Headers $mcProfileHeaders
+
+    Write-Host "`n==== Minecraft Account Info ====" -ForegroundColor Green
+    Write-Host "Username: $($mcProfile.name)"
+    Write-Host "UUID:     $($mcProfile.id)"
+    return @{ token = $mcToken; profile = $mcProfile }
 }
 
-# Export variables
 $result = Get-Microsoft-Minecraft-Identity
 if ($result -ne $null) {
     $mcToken = $result.token
