@@ -3,12 +3,7 @@
 
 function Open-Url {
     param([string]$url)
-    try {
-        Start-Process $url
-    } catch {
-        Write-Host "Couldn't automatically open your browser. Please copy and paste this URL into your browser:" -ForegroundColor Red
-        Write-Host $url -ForegroundColor Yellow
-    }
+    Start-Process $url
 }
 
 function Get-Microsoft-Minecraft-Identity {
