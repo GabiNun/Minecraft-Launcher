@@ -5,7 +5,7 @@ if (Test-Path $loginFile) {
     $mcToken = $login.token
     $mcProfile = $login.profile
 } else {
-    irm https://raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Microsoft-Login.ps1 | iex
+    irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Microsoft-Login.ps1 | iex
 }
 
 New-Item $env:APPDATA\.minecraft\assets\indexes -ItemType Directory -Force | Out-Null
