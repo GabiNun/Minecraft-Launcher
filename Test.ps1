@@ -1,5 +1,5 @@
 # Authenticate with Microsoft account using your remote script
-irm https://raw.githubusercontent.com/GabiNun/Minecraft-Launcher/refs/heads/main/Microsoft-Login.ps1 | iex
+irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/refs/heads/main/Microsoft-Login.ps1 | iex
 
 if ($null -eq $mcToken -or $null -eq $mcProfile) {
     Write-Host "Login failed or user does not own Minecraft. Exiting launcher."
@@ -46,7 +46,7 @@ foreach ($file in $json.objects.PSObject.Properties) {
     if (-not (Test-Path $dest)) {
         $dir = Split-Path $dest
         if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
-        irm -Uri "https://resources.downloadminecraft.net/$subdir/$hash" -OutFile $dest
+        irm -Uri "resources.downloadminecraft.net/$subdir/$hash" -OutFile $dest
         Write-Host "Downloaded $path"
     }
 }
