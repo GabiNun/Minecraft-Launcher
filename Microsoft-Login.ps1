@@ -1,16 +1,6 @@
 # Microsoft Login Authentication for Minecraft Launcher (Classic "just the code" flow)
 # Outputs: $mcToken, $mcProfile
 
-function Open-Url {
-    param([string]$url)
-    try {
-        Start-Process $url
-    } catch {
-        Write-Host "Couldn't automatically open your browser. Please copy and paste this URL into your browser:" -ForegroundColor Red
-        Write-Host $url -ForegroundColor Yellow
-    }
-}
-
 function Get-Microsoft-Minecraft-Identity {
     $clientId    = "00000000402b5328"
     $redirectUri = "https://login.live.com/oauth20_desktop.srf"
