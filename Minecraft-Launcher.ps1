@@ -52,11 +52,11 @@ $args = @(
     "--gameDir", "$env:APPDATA\.minecraft",
     "--assetsDir", "$env:APPDATA\.minecraft\assets",
     "--assetIndex", $latestReleaseData.assets,
-    "--uuid", "00000000-0000-0000-0000-000000000000",
-    "--username", "Player",
+    "--uuid", $mcProfile.id,
+    "--username", $mcProfile.name,
     "--versionType", "release",
-    "--accessToken", "0",
-    "--userType", "legacy"
+    "--accessToken", $mcToken,
+    "--userType", "msa"
 )
 
 java -cp $classpathString net.minecraft.client.main.Main $args
