@@ -1,4 +1,4 @@
-irm https://raw.githubusercontent.com/GabiNun/Minecraft-Launcher/refs/heads/main/Microsoft-Login.ps1 | iex
+irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/refs/heads/main/Microsoft-Login.ps1 | iex
 
 New-Item $env:APPDATA\.minecraft\assets\indexes -ItemType Directory -Force | Out-Null
 $ProgressPreference = 'SilentlyContinue'
