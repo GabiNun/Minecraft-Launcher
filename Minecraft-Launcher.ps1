@@ -1,4 +1,12 @@
-irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/refs/heads/main/Microsoft-Login.ps1 | iex
+$loginFile = "$env:APPDATA\.minecraft\login.json"
+
+if (Test-Path $loginFile) {
+    $login = Get-Content $loginFile -Raw | ConvertFrom-Json
+    $mcToken = $login.token
+    $mcProfile = $login.profile
+} else {
+    irm "https://raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Microsoft-Login.ps1" | iex
+}
 
 New-Item $env:APPDATA\.minecraft\assets\indexes -ItemType Directory -Force | Out-Null
 $ProgressPreference = 'SilentlyContinue'
