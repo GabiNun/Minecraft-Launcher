@@ -7,7 +7,8 @@ function Get-Microsoft-Minecraft-Identity {
     $scope       = "XboxLive.signin offline_access"
     $authUrl     = "https://login.live.com/oauth20_authorize.srf?client_id=$clientId&response_type=code&redirect_uri=$redirectUri&scope=$scope"
 
-    Open-Url $authUrl
+    Write-Host "Open this URL in your browser and log in:" -ForegroundColor Yellow
+    Write-Host $authUrl -ForegroundColor Cyan
 
     $authCode = Read-Host "`nPaste ONLY the code from the browser's URL after login (the value after 'code=')"
 
