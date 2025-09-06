@@ -66,10 +66,6 @@ function Get-Microsoft-Minecraft-Identity {
     $token = (Invoke-RestMethod -Method Post -Uri "https://api.minecraftservices.com/authentication/login_with_xbox" -Headers @{ "Content-Type"="application/json" } -Body (@{identityToken=$identity} | ConvertTo-Json)).access_token
     $profile = Invoke-RestMethod "https://api.minecraftservices.com/minecraft/profile" -Headers @{Authorization="Bearer $token"}
 
-    Write-Host "`n==== Minecraft Account Info ====" -ForegroundColor Green
-    Write-Host "Username: $($profile.name)"
-    Write-Host "UUID:     $($profile.id)"
-
     Save-LoginFile $token $profile
     return @{token=$token;profile=$profile}
 }
