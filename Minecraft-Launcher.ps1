@@ -1,5 +1,3 @@
-$ProgressPreference = 'SilentlyContinue'
-
 if (Test-Path $loginFile) {
     $login = Get-Content $loginFile -Raw | ConvertFrom-Json
 } else {
@@ -11,6 +9,7 @@ if (Test-Path $loginFile) {
     $login = Get-Content $loginFile -Raw | ConvertFrom-Json
 }
 
+$ProgressPreference = 'SilentlyContinue'
 $manifest = irm launchermeta.mojang.com/mc/game/version_manifest.json
 $latestReleaseUrl = ($manifest.versions | ? id -eq $manifest.latest.release).url
 $latestReleaseData = irm $latestReleaseUrl
