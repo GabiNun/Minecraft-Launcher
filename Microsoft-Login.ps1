@@ -1,7 +1,3 @@
-function Save-LoginFile($token, $profile) {
-    Set-Content $loginFile -Value (@{token=$token;profile=$profile} | ConvertTo-Json -Depth 6)
-}
-
 function Get-Microsoft-Minecraft-Identity {
 
     Start-Process "https://login.live.com/oauth20_authorize.srf?client_id=00000000402b5328&response_type=code&redirect_uri=https://login.live.com/oauth20_desktop.srf&scope=XboxLive.signin offline_access"
@@ -37,6 +33,6 @@ function Get-Microsoft-Minecraft-Identity {
     $token = (Invoke-RestMethod -Method Post -Uri "https://api.minecraftservices.com/authentication/login_with_xbox" -Headers @{ "Content-Type"="application/json" } -Body (@{identityToken=$identity} | ConvertTo-Json)).access_token
     $profile = Invoke-RestMethod "https://api.minecraftservices.com/minecraft/profile" -Headers @{Authorization="Bearer $token"}
 
-    Save-LoginFile $token $profile
+    Set-Content $loginFile -Value (@{token=$token; profile=$profile} | ConvertTo-Json -Depth 6)
     return @{token=$token;profile=$profile}
 }
