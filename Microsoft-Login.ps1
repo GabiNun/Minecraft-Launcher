@@ -1,8 +1,3 @@
-function Open-Url {
-    param([string]$url)
-    Start-Process $url
-}
-
 function Save-LoginFile($token, $profile) {
     Set-Content $loginFile -Value (@{token=$token;profile=$profile} | ConvertTo-Json -Depth 6)
 }
@@ -33,7 +28,7 @@ function Get-Microsoft-Minecraft-Identity {
         return $login
     }
 
-    Open-Url "https://login.live.com/oauth20_authorize.srf?client_id=00000000402b5328&response_type=code&redirect_uri=https://login.live.com/oauth20_desktop.srf&scope=XboxLive.signin offline_access"
+    Start-Process "https://login.live.com/oauth20_authorize.srf?client_id=00000000402b5328&response_type=code&redirect_uri=https://login.live.com/oauth20_desktop.srf&scope=XboxLive.signin offline_access"
     $code = Read-Host "`nPaste ONLY the code from the browser's URL after login (the value after 'code=')"
 
     $access = (Invoke-RestMethod -Method Post -Uri "https://login.live.com/oauth20_token.srf" -Body @{
