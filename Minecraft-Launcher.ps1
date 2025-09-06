@@ -3,8 +3,7 @@ $loginFile = "$env:APPDATA\.minecraft\login.json"
 if (Test-Path $loginFile) {
     $login = Get-Content $loginFile -Raw | ConvertFrom-Json
 } else {
-    ni $env:APPDATA\.minecraft\assets\indexes -ItemType Directory | Out-Null
-    ni $loginFile | Out-Null
+    ni $env:APPDATA\.minecraft\assets\indexes -ItemType Directory | Out-Null;ni $loginFile | Out-Null
     irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Microsoft-Login.ps1 | iex
     Get-Microsoft-Minecraft-Identity
     $login = Get-Content $loginFile -Raw | ConvertFrom-Json
