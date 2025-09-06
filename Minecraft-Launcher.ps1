@@ -1,15 +1,15 @@
+$ProgressPreference = 'SilentlyContinue'
 $loginFile = "$env:APPDATA\.minecraft\login.json"
 
 if (Test-Path $loginFile) {
     $login = Get-Content $loginFile -Raw | ConvertFrom-Json
     $mcToken = $login.token
     $mcProfile = $login.profile
-} else {
+} else }
+    ni $env:APPDATA\.minecraft\assets\indexes -ItemType Directory | Out-Null
+    ni "$env:APPDATA\.minecraft\login.json" | Out-Null
     irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Microsoft-Login.ps1 | iex
 }
-
-New-Item $env:APPDATA\.minecraft\assets\indexes -ItemType Directory -Force | Out-Null
-$ProgressPreference = 'SilentlyContinue'
 
 $manifest = irm launchermeta.mojang.com/mc/game/version_manifest.json
 $latestReleaseUrl = ($manifest.versions | ? id -eq $manifest.latest.release).url
