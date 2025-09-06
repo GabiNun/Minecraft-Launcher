@@ -11,19 +11,9 @@ function Load-LoginFile {
     return $null
 }
 
-function Is-Token-Valid($token) {
-    if ($token) {
-        try {
-            Invoke-RestMethod "https://api.minecraftservices.com/minecraft/profile" -Headers @{Authorization="Bearer $token"} -ErrorAction Stop | Out-Null
-            return $true
-        } catch { return $false }
-    }
-    return $false
-}
-
 function Get-Microsoft-Minecraft-Identity {
     $login = Load-LoginFile
-    if ($login -and (Is-Token-Valid $login.token)) {
+    if ($login) {
         Write-Host "Using saved login file!" -ForegroundColor Green
         return $login
     }
