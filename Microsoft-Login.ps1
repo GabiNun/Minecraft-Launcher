@@ -2,21 +2,7 @@ function Save-LoginFile($token, $profile) {
     Set-Content $loginFile -Value (@{token=$token;profile=$profile} | ConvertTo-Json -Depth 6)
 }
 
-function Load-LoginFile {
-    if (Test-Path $loginFile) {
-        try {
-            return (Get-Content $loginFile -Raw | ConvertFrom-Json)
-        } catch { return $null }
-    }
-    return $null
-}
-
 function Get-Microsoft-Minecraft-Identity {
-    $login = Load-LoginFile
-    if ($login) {
-        Write-Host "Using saved login file!" -ForegroundColor Green
-        return $login
-    }
 
     Start-Process "https://login.live.com/oauth20_authorize.srf?client_id=00000000402b5328&response_type=code&redirect_uri=https://login.live.com/oauth20_desktop.srf&scope=XboxLive.signin offline_access"
     $code = Read-Host "`nPaste ONLY the code from the browser's URL after login (the value after 'code=')"
