@@ -1,4 +1,5 @@
 $loginFile = "$env:APPDATA\.minecraft\login.json"
+
 if (Test-Path $loginFile) {
     $login = Get-Content $loginFile -Raw | ConvertFrom-Json
 } else {
