@@ -1,4 +1,4 @@
-ni $env:APPDATA\.minecraft\assets\indexes -ItemType Directory | Out-Null
+ni $env:APPDATA\.minecraft\assets\indexes -ItemType Directory -Force | Out-Null
 $loginFile = "$env:APPDATA\.minecraft\login.json"
 
 if (Test-Path $loginFile) {
