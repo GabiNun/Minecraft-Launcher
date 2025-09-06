@@ -1,5 +1,3 @@
-# Microsoft Login Authentication for Minecraft Launcher
-
 function Open-Url {
     param([string]$url)
     Start-Process $url
