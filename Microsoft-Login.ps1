@@ -7,7 +7,8 @@ function Get-Microsoft-Minecraft-Identity {
 
     $access = (irm -Method Post -Uri "https://login.live.com/oauth20_token.srf" -Body @{
         client_id="00000000402b5328"
-        grant_type="authorization_$code"
+        code=$code
+        grant_type="authorization_code"
         redirect_uri="https://login.live.com/oauth20_desktop.srf"
     }).access_token
 
