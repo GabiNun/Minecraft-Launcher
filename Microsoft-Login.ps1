@@ -1,5 +1,5 @@
 # Microsoft Login Authentication for Minecraft Launcher
-# Results $login.profile.id, $login.profile.name, $login.token
+
 function Get-Microsoft-Minecraft-Identity {
 
     Start-Process "https://login.live.com/oauth20_authorize.srf?client_id=00000000402b5328&response_type=code&redirect_uri=https://login.live.com/oauth20_desktop.srf&scope=XboxLive.signin offline_access"
