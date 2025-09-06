@@ -5,7 +5,7 @@ if (Test-Path $loginFile) {
     $login = Get-Content $loginFile -Raw | ConvertFrom-Json
     $mcToken = $login.token
     $mcProfile = $login.profile
-} else }
+} else {
     ni $env:APPDATA\.minecraft\assets\indexes -ItemType Directory | Out-Null
     ni "$env:APPDATA\.minecraft\login.json" | Out-Null
     irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Microsoft-Login.ps1 | iex
