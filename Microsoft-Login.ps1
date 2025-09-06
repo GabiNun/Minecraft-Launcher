@@ -5,8 +5,6 @@ function Open-Url {
     Start-Process $url
 }
 
-$loginFile = "$env:APPDATA\.minecraft\login.json"
-
 function Save-LoginFile($token, $profile) {
     Set-Content $loginFile -Value (@{token=$token;profile=$profile} | ConvertTo-Json -Depth 6)
 }
