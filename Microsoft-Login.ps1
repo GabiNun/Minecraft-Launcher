@@ -54,5 +54,3 @@ function Get-Microsoft-Minecraft-Identity {
     Save-LoginFile $token $profile
     return @{token=$token;profile=$profile}
 }
-
-$result = Get-Microsoft-Minecraft-Identity
