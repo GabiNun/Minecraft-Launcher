@@ -36,5 +36,4 @@ function Get-Microsoft-Minecraft-Identity {
     $profile = Invoke-RestMethod "https://api.minecraftservices.com/minecraft/profile" -Headers @{Authorization="Bearer $token"}
 
     Set-Content $loginFile -Value (@{token=$token; profile=$profile} | ConvertTo-Json -Depth 6)
-    return @{token=$token;profile=$profile}
 }
