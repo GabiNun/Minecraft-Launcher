@@ -7,6 +7,7 @@ if (Test-Path $loginFile) {
     ni $env:APPDATA\.minecraft\assets\indexes -ItemType Directory | Out-Null
     ni "$env:APPDATA\.minecraft\login.json" | Out-Null
     irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Microsoft-Login.ps1 | iex
+    Get-Microsoft-Minecraft-Identity
 }
 
 $manifest = irm launchermeta.mojang.com/mc/game/version_manifest.json
