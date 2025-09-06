@@ -3,7 +3,7 @@
 function Get-Microsoft-Minecraft-Identity {
 
     Start-Process "https://login.live.com/oauth20_authorize.srf?client_id=00000000402b5328&response_type=code&redirect_uri=https://login.live.com/oauth20_desktop.srf&scope=XboxLive.signin offline_access"
-    $code = Read-Host "`nPaste ONLY the code from the browser's URL after login (the value after 'code=')"
+    $code = Read-Host "`nPaste in the value after code= and before &lc=1033)"
 
     $access = (Invoke-RestMethod -Method Post -Uri "https://login.live.com/oauth20_token.srf" -Body @{
         client_id="00000000402b5328"
