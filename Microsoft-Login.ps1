@@ -57,4 +57,3 @@ function Get-Microsoft-Minecraft-Identity {
 
 $result = Get-Microsoft-Minecraft-Identity
 $mcProfile = $result.profile
-$mcToken = $result.token
