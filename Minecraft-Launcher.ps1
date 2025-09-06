@@ -3,8 +3,6 @@ $loginFile = "$env:APPDATA\.minecraft\login.json"
 
 if (Test-Path $loginFile) {
     $login = Get-Content $loginFile -Raw | ConvertFrom-Json
-    $mcToken = $login.token
-    $mcProfile = $login.profile
 } else {
     ni $env:APPDATA\.minecraft\assets\indexes -ItemType Directory | Out-Null
     ni "$env:APPDATA\.minecraft\login.json" | Out-Null
@@ -60,10 +58,10 @@ $args = @(
     "--gameDir", "$env:APPDATA\.minecraft",
     "--assetsDir", "$env:APPDATA\.minecraft\assets",
     "--assetIndex", $latestReleaseData.assets,
-    "--uuid", $mcProfile.id,
-    "--username", $mcProfile.name,
+    "--uuid", $login.profile.id,
+    "--username", $login.profile.name,
     "--versionType", "release",
-    "--accessToken", $mcToken,
+    "--accessToken", $login.token,
     "--userType", "msa"
 )
 
