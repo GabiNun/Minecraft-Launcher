@@ -2,15 +2,6 @@ function Save-LoginFile($token, $profile) {
     Set-Content $loginFile -Value (@{token=$token;profile=$profile} | ConvertTo-Json -Depth 6)
 }
 
-function Load-LoginFile {
-    if (Test-Path $loginFile) {
-        try {
-            return (Get-Content $loginFile -Raw | ConvertFrom-Json)
-        } catch { return $null }
-    }
-    return $null
-}
-
 function Get-Microsoft-Minecraft-Identity {
     $login = Load-LoginFile
     if ($login) {
