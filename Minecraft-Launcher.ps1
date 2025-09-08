@@ -6,6 +6,7 @@ if (Test-Path $loginFile) {
 } else {
     ni $loginFile | Out-Null
     irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Microsoft-Login.ps1 | iex
+    Get-Microsoft-Minecraft-Identity
     $login = Get-Content $loginFile -Raw | ConvertFrom-Json
 }
 
