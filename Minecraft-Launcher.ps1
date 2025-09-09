@@ -32,7 +32,7 @@ foreach ($lib in $latestReleaseData.libraries) {
         if (-not $skip) {
             $file = Join-Path $env:APPDATA ".minecraft\libraries\$($lib.downloads.artifact.path)"
             if (-not (Test-Path (Split-Path $file))) { New-Item -ItemType Directory -Path (Split-Path $file) -Force | Out-Null }
-            if (-not (Test-Path $file)) { irm $lib.downloads.artifact.url -OutFile $file; Write-Host "Downloaded $($lib.downloads.artifact.path)" }
+            if (-not (Test-Path $file)) { irm $lib.downloads.artifact.url -OutFile $file }
         }
     }
 }
@@ -48,7 +48,6 @@ foreach ($file in $json.objects.PSObject.Properties) {
         $dir = Split-Path $dest
         if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
         irm -Uri "https://resources.download.minecraft.net/$subdir/$hash" -OutFile $dest
-        Write-Host "Downloaded $path"
     }
 }
 
