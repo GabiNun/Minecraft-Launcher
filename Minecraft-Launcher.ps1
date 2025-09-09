@@ -16,12 +16,13 @@ $latestReleaseUrl = ($manifest.versions | ? id -eq $manifest.latest.release).url
 $latestReleaseData = irm $latestReleaseUrl
 $json = irm $latestReleaseData.assetIndex.url
 
+$indexFilePath = "$env:APPDATA\.minecraft\assets\indexes\$($latestReleaseData.assets).json"
 $filePath = "$env:APPDATA\.minecraft\client.jar"
+
 if (-not (Test-Path $filePath)) {
     irm $latestReleaseData.downloads.client.url -OutFile $filePath
 }
 
-$indexFilePath = "$env:APPDATA\.minecraft\assets\indexes\$($latestReleaseData.assets).json"
 if (-not (Test-Path $indexFilePath)) {
     irm $latestReleaseData.assetIndex.url -OutFile $indexFilePath
 }
