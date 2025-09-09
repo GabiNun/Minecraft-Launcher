@@ -40,8 +40,7 @@ foreach ($lib in $latestReleaseData.libraries) {
 
 foreach ($file in $json.objects.PSObject.Properties) {
     $path = $file.Name
-    if ($path -like "minecraft/sounds*") { continue }
-    if ($path -like "minecraft/lang/*.json" -and -not $path.EndsWith("en_us.json")) { continue }
+    if ($path -like "minecraft/sounds*" -or ($path -like "minecraft/lang/*.json" -and -not $path.EndsWith("en_us.json"))) { continue }
     $hash = $file.Value.hash
     $subdir = $hash.Substring(0, 2)
     $dest = "$env:APPDATA\.minecraft\assets\objects\$subdir\$hash"
