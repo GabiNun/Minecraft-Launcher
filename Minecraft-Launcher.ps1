@@ -37,14 +37,12 @@ foreach ($lib in $latestReleaseData.libraries) {
     }
 }
 
-foreach ($file in (irm $latestReleaseData.assetIndex.url).objects.PSObject.Properties) {
+foreach ($file in $json.objects.PSObject.Properties) {
     if ($file.Name -like "minecraft/sounds*" -or ($file.Name -like "minecraft/lang/*.json" -and -not $file.Name.EndsWith("en_us.json"))) { continue }
-    $subdir = $file.Value.hash.Substring(0, 2)
-    $dest = "$env:APPDATA\.minecraft\assets\objects\$subdir\$file.Value.hash"
+    $dest = "$env:APPDATA\.minecraft\assets\objects\$($file.Value.hash.Substring(0,2))\$($file.Value.hash)"
     if (-not (Test-Path $dest)) {
-        $dir = Split-Path $dest
-        if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
-        irm -Uri "https://resources.download.minecraft.net/$subdir/$hash" -OutFile $dest
+        if (-not (Test-Path (Split-Path $dest))) { New-Item -ItemType Directory -Path (Split-Path $dest) -Force | Out-Null }
+        irm -Uri "https://resources.download.minecraft.net/$($file.Value.hash.Substring(0,2))/$($file.Value.hash)" -OutFile $dest
     }
 }
 
