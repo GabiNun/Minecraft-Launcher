@@ -53,4 +53,4 @@ foreach ($file in $json.objects.PSObject.Properties) {
 
 $classpathString = "$([string]::Join(';', (gci $env:APPDATA\.minecraft\libraries -r -fi *.jar).FullName));$env:APPDATA\.minecraft\client.jar"
 
-java -cp $classpathString net.minecraft.client.main.Main --enable-native-access=ALL-UNNAMED --version $latestReleaseData.id --gameDir "$env:APPDATA\.minecraft" --assetsDir "$env:APPDATA\.minecraft\assets" --assetIndex $latestReleaseData.assets --uuid $login.profile.id --username $login.profile.name --versionType release --accessToken $login.token --userType msa
+java -cp $classpathString net.minecraft.client.main.Main --version $latestReleaseData.id --gameDir "$env:APPDATA\.minecraft" --assetsDir "$env:APPDATA\.minecraft\assets" --assetIndex $latestReleaseData.assets --uuid $login.profile.id --username $login.profile.name --versionType release --accessToken $login.token --userType msa
