@@ -14,7 +14,6 @@ $ProgressPreference = 'SilentlyContinue'
 $manifest = irm launchermeta.mojang.com/mc/game/version_manifest.json
 $latestReleaseUrl = ($manifest.versions | ? id -eq $manifest.latest.release).url
 $latestReleaseData = irm $latestReleaseUrl
-$json = irm $latestReleaseData.assetIndex.url
 
 $indexFilePath = "$env:APPDATA\.minecraft\assets\indexes\$($latestReleaseData.assets).json"
 $filePath = "$env:APPDATA\.minecraft\client.jar"
@@ -38,7 +37,7 @@ foreach ($lib in $latestReleaseData.libraries) {
     }
 }
 
-foreach ($file in $json.objects.PSObject.Properties) {
+foreach ($file in (irm $latestReleaseData.assetIndex.url).objects.PSObject.Properties) {
     $path = $file.Name
     if ($path -like "minecraft/sounds*") { continue }
     if ($path -like "minecraft/lang/*.json" -and -not $path.EndsWith("en_us.json")) { continue }
