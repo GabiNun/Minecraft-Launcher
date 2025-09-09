@@ -14,14 +14,14 @@ $ProgressPreference = 'SilentlyContinue'
 $manifest = irm launchermeta.mojang.com/mc/game/version_manifest.json
 $latestReleaseUrl = ($manifest.versions | ? id -eq $manifest.latest.release).url
 $latestReleaseData = irm $latestReleaseUrl
+$json = irm $latestReleaseData.assetIndex.url
 
-$indexFilePath = "$env:APPDATA\.minecraft\assets\indexes\$($latestReleaseData.assets).json"
 $filePath = "$env:APPDATA\.minecraft\client.jar"
-
 if (-not (Test-Path $filePath)) {
     irm $latestReleaseData.downloads.client.url -OutFile $filePath
 }
 
+$indexFilePath = "$env:APPDATA\.minecraft\assets\indexes\$($latestReleaseData.assets).json"
 if (-not (Test-Path $indexFilePath)) {
     irm $latestReleaseData.assetIndex.url -OutFile $indexFilePath
 }
@@ -38,11 +38,16 @@ foreach ($lib in $latestReleaseData.libraries) {
 }
 
 foreach ($file in $json.objects.PSObject.Properties) {
-    if ($file.Name -like "minecraft/sounds*" -or ($file.Name -like "minecraft/lang/*.json" -and -not $file.Name.EndsWith("en_us.json"))) { continue }
-    $dest = "$env:APPDATA\.minecraft\assets\objects\$($file.Value.hash.Substring(0,2))\$($file.Value.hash)"
+    $path = $file.Name
+    if ($path -like "minecraft/sounds*") { continue }
+    if ($path -like "minecraft/lang/*.json" -and -not $path.EndsWith("en_us.json")) { continue }
+    $hash = $file.Value.hash
+    $subdir = $hash.Substring(0, 2)
+    $dest = "$env:APPDATA\.minecraft\assets\objects\$subdir\$hash"
     if (-not (Test-Path $dest)) {
-        if (-not (Test-Path (Split-Path $dest))) { New-Item -ItemType Directory -Path (Split-Path $dest) -Force | Out-Null }
-        irm -Uri "https://resources.download.minecraft.net/$($file.Value.hash.Substring(0,2))/$($file.Value.hash)" -OutFile $dest
+        $dir = Split-Path $dest
+        if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+        irm -Uri "https://resources.download.minecraft.net/$subdir/$hash" -OutFile $dest
     }
 }
 
