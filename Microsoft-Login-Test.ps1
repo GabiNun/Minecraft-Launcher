@@ -20,7 +20,7 @@ $deviceCodeResponse = Invoke-RestMethod -Method Post `
 Start-Process $deviceCodeResponse.verification_uri
 
 # Show instructions to the user
-Write-Host "A browser window has been opened. Enter the following code if needed:" -ForegroundColor Cyan
+Write-Host "A browser window has been opened. Enter the following code if needed: " -ForegroundColor Cyan -NoNewline
 Write-Host $deviceCodeResponse.user_code -ForegroundColor Yellow
 
 # -----------------------------
