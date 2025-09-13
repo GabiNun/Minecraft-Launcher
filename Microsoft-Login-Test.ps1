@@ -1,9 +1,9 @@
 # -----------------------------
 # Configuration
 # -----------------------------
-$tenantId = "ea3b1daf-a836-4b75-abac-e38ea3cec163"   # Your Tenant ID
-$clientId = "ec859e96-84d8-4375-a43f-2d7d949d2ded" # Your App Client ID
-$scope = "https://graph.microsoft.com/.default offline_access" # Permissions your app needs
+$tenantId = "ea3b1daf-a836-4b75-abac-e38ea3cec163"
+$clientId = "ec859e96-84d8-4375-a43f-2d7d949d2ded"
+$scope = "https://graph.microsoft.com/.default offline_access"
 
 # -----------------------------
 # Step 1: Request a device code
@@ -16,8 +16,12 @@ $deviceCodeResponse = Invoke-RestMethod -Method Post `
         scope = $scope
     }
 
+# Open the verification URL in the browser automatically
+Start-Process $deviceCodeResponse.verification_uri
+
 # Show instructions to the user
-Write-Host $deviceCodeResponse.message
+Write-Host "A browser window has been opened. Enter the following code if needed:" -ForegroundColor Cyan
+Write-Host $deviceCodeResponse.user_code -ForegroundColor Yellow
 
 # -----------------------------
 # Step 2: Poll for access token
@@ -45,5 +49,3 @@ do {
 # -----------------------------
 $accessToken = $tokenResponse.access_token
 Write-Host "`nAccess Token:`n$accessToken"
-
-# You can now use $accessToken in Authorization headers for Microsoft Graph API calls
