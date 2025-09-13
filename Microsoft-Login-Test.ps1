@@ -1,4 +1,4 @@
-$clientId = "YOUR_CLIENT_ID"
+$clientId = "ec859e96-84d8-4375-a43f-2d7d949d2ded"
 $redirectUri = "http://localhost"
 $scope = "XboxLive.signin offline_access"
 
