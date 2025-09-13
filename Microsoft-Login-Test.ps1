@@ -5,63 +5,85 @@ $Scopes   = "XboxLive.signin offline_access openid profile"
 $deviceUri = "https://login.microsoftonline.com/$Tenant/oauth2/v2.0/devicecode"
 $tokenUri  = "https://login.microsoftonline.com/$Tenant/oauth2/v2.0/token"
 
-$deviceResp = Invoke-RestMethod -Method Post -Uri $deviceUri -ContentType 'application/x-www-form-urlencoded' -Body @{
-    client_id = $ClientId
-    scope     = $Scopes
+try {
+    $deviceResp = Invoke-RestMethod -Method Post -Uri $deviceUri -ContentType 'application/x-www-form-urlencoded' -Body @{
+        client_id = $ClientId
+        scope     = $Scopes
+    }
+} catch {
+    Write-Error "Failed to request device code: $($_.Exception.Message)"
+    Read-Host -Prompt "Press Enter to close"
+    return
 }
 
+Write-Host ""
 Write-Host $deviceResp.message
-
+Write-Host ""
+Write-Host "User code: $($deviceResp.user_code)"
 $openUrl = $deviceResp.verification_uri_complete
 if (-not $openUrl) { $openUrl = $deviceResp.verification_uri }
 if ($openUrl) { Start-Process $openUrl }
 
+Read-Host -Prompt "Open the link, enter the code, then press Enter here to start polling"
+
 $expiresAt = (Get-Date).AddSeconds([int]$deviceResp.expires_in)
 $interval  = [int]$deviceResp.interval
-
-$token = $null
+$token     = $null
 
 while ((Get-Date) -lt $expiresAt) {
     Start-Sleep -Seconds $interval
-
     try {
-        $token = Invoke-RestMethod -Method Post -Uri $tokenUri -ContentType 'application/x-www-form-urlencoded' -Body @{
+        $raw = Invoke-WebRequest -Method Post -Uri $tokenUri -ContentType 'application/x-www-form-urlencoded' -Body @{
             grant_type  = 'urn:ietf:params:oauth:grant-type:device_code'
             client_id   = $ClientId
             device_code = $deviceResp.device_code
-        }
-        break
+        } -UseBasicParsing
+        try { $token = $raw.Content | ConvertFrom-Json } catch { $token = $null }
+        if ($token -and $token.access_token) { break }
     } catch {
         $resp = $_.Exception.Response
         if ($resp -ne $null) {
             $reader  = New-Object System.IO.StreamReader($resp.GetResponseStream())
             $content = $reader.ReadToEnd()
             try { $err = $content | ConvertFrom-Json } catch { $err = $null }
-
             if ($err -and $err.error) {
                 if ($err.error -eq 'authorization_pending') { continue }
                 if ($err.error -eq 'slow_down') { $interval += 5; continue }
-                if ($err.error -eq 'expired_token') { Write-Error 'Device code expired. Restart process.' ; exit 1 }
+                if ($err.error -eq 'expired_token') {
+                    Write-Error 'Device code expired. Restart process.'
+                    Read-Host -Prompt "Press Enter to close"
+                    return
+                }
+                if ($err.error -eq 'access_denied') {
+                    Write-Error 'User denied the request.'
+                    Read-Host -Prompt "Press Enter to close"
+                    return
+                }
                 Write-Error "Token error: $($err.error) - $($err.error_description)"
-                exit 1
+                Read-Host -Prompt "Press Enter to close"
+                return
             } else {
                 Write-Error "Unexpected token endpoint response: $content"
-                exit 1
+                Read-Host -Prompt "Press Enter to close"
+                return
             }
         } else {
             Write-Error $_.Exception.Message
-            exit 1
+            Read-Host -Prompt "Press Enter to close"
+            return
         }
     }
 }
 
 if (-not $token) {
     Write-Error "No token received. Make sure you completed the browser sign-in within the time window."
-    exit 1
+    Read-Host -Prompt "Press Enter to close"
+    return
 }
 
 $msAccessToken = $token.access_token
 Write-Host "Got Microsoft access token."
+Read-Host -Prompt "Press Enter to continue with Xbox/Minecraft exchange (or Ctrl+C to stop)"
 
 $headers = @{ 'Content-Type' = 'application/json'; 'Accept' = 'application/json' }
 
@@ -75,11 +97,16 @@ $body = @{
     TokenType    = "JWT"
 } | ConvertTo-Json -Depth 10
 
-$xblResp = Invoke-RestMethod -Uri 'https://user.auth.xboxlive.com/user/authenticate' -Method Post -Headers $headers -Body $body
-$xblToken = $xblResp.Token
-$uhs      = $xblResp.DisplayClaims.xui[0].uhs
-
-Write-Host "Got Xbox Live token."
+try {
+    $xblResp = Invoke-RestMethod -Uri 'https://user.auth.xboxlive.com/user/authenticate' -Method Post -Headers $headers -Body $body
+    $xblToken = $xblResp.Token
+    $uhs      = $xblResp.DisplayClaims.xui[0].uhs
+    Write-Host "Got Xbox Live token."
+} catch {
+    Write-Error "Xbox Live authenticate failed: $($_.Exception.Message)"
+    Read-Host -Prompt "Press Enter to close"
+    return
+}
 
 $xstsBody = @{
     Properties = @{
@@ -90,23 +117,38 @@ $xstsBody = @{
     TokenType    = "JWT"
 } | ConvertTo-Json -Depth 10
 
-$xstsResp  = Invoke-RestMethod -Uri 'https://xsts.auth.xboxlive.com/xsts/authorize' -Method Post -Headers $headers -Body $xstsBody
-$xstsToken = $xstsResp.Token
-
-Write-Host "Got XSTS token."
+try {
+    $xstsResp  = Invoke-RestMethod -Uri 'https://xsts.auth.xboxlive.com/xsts/authorize' -Method Post -Headers $headers -Body $xstsBody
+    $xstsToken = $xstsResp.Token
+    Write-Host "Got XSTS token."
+} catch {
+    Write-Error "XSTS authorize failed: $($_.Exception.Message)"
+    Read-Host -Prompt "Press Enter to close"
+    return
+}
 
 $identityToken = "XBL3.0 x=$uhs;$xstsToken"
 $mcBody        = @{ identityToken = $identityToken } | ConvertTo-Json -Depth 6
 
-$mcResp = Invoke-RestMethod -Uri 'https://api.minecraftservices.com/authentication/login_with_xbox' -Method Post -Headers @{ 'Content-Type' = 'application/json' } -Body $mcBody
+try {
+    $mcResp = Invoke-RestMethod -Uri 'https://api.minecraftservices.com/authentication/login_with_xbox' -Method Post -Headers @{ 'Content-Type' = 'application/json' } -Body $mcBody
+    $mcAccessToken  = $mcResp.access_token
+    $mcExpiresIn    = $mcResp.expires_in
+    Write-Host "Got Minecraft access token."
+} catch {
+    Write-Error "Minecraft login failed: $($_.Exception.Message)"
+    Read-Host -Prompt "Press Enter to close"
+    return
+}
 
-$mcAccessToken  = $mcResp.access_token
-$mcExpiresIn    = $mcResp.expires_in
-
-Write-Host "Got Minecraft access token."
-
-$entitlements = Invoke-RestMethod -Uri 'https://api.minecraftservices.com/entitlements/mcstore' -Headers @{ Authorization = "Bearer $mcAccessToken" } -Method Get
-$profile      = Invoke-RestMethod -Uri 'https://api.minecraftservices.com/minecraft/profile'     -Headers @{ Authorization = "Bearer $mcAccessToken" } -Method Get
+try {
+    $entitlements = Invoke-RestMethod -Uri 'https://api.minecraftservices.com/entitlements/mcstore' -Headers @{ Authorization = "Bearer $mcAccessToken" } -Method Get
+    $profile      = Invoke-RestMethod -Uri 'https://api.minecraftservices.com/minecraft/profile'     -Headers @{ Authorization = "Bearer $mcAccessToken" } -Method Get
+} catch {
+    Write-Error "Failed to retrieve entitlements/profile: $($_.Exception.Message)"
+    Read-Host -Prompt "Press Enter to close"
+    return
+}
 
 $result = [PSCustomObject]@{
     MSAccessToken        = $msAccessToken
@@ -119,3 +161,4 @@ $result = [PSCustomObject]@{
 }
 
 $result | Format-List
+Read-Host -Prompt "Done. Press Enter to close"
