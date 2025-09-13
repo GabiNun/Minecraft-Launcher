@@ -37,4 +37,4 @@ do {
     }
 } while (-not $tokenResponse)
 
-Write-Host "`nAccess Token:`n$tokenResponse.access_token"
+Write-Host "`nAccess Token:`n$($tokenResponse.access_token)"
