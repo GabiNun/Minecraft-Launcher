@@ -4,7 +4,6 @@ $clientId = "ec859e96-84d8-4375-a43f-2d7d949d2ded"
 $scope = "https://graph.microsoft.com/.default offline_access"
 
 # Step 1: Request a device code
-
 $deviceCodeResponse = Invoke-RestMethod -Method Post `
     -Uri "https://login.microsoftonline.com/$tenantId/oauth2/v2.0/devicecode" `
     -ContentType "application/x-www-form-urlencoded" `
@@ -21,7 +20,6 @@ Write-Host "A browser window has been opened. Enter the following code if needed
 Write-Host $deviceCodeResponse.user_code -ForegroundColor Yellow
 
 # Step 2: Poll for access token
-
 $body = @{
     grant_type  = "urn:ietf:params:oauth:grant-type:device_code"
     client_id   = $clientId
