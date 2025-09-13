@@ -1,58 +1,49 @@
-$clientId = "ec859e96-84d8-4375-a43f-2d7d949d2ded"
-$scope = "XboxLive.signin offline_access"
+# -----------------------------
+# Configuration
+# -----------------------------
+$tenantId = "ea3b1daf-a836-4b75-abac-e38ea3cec163"   # Your Tenant ID
+$clientId = "ec859e96-84d8-4375-a43f-2d7d949d2ded" # Your App Client ID
+$scope = "https://graph.microsoft.com/.default offline_access" # Permissions your app needs
 
-# Step 1: Request device code
-$deviceCodeResponse = Invoke-RestMethod -Uri "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode" -Method POST -Body @{
-    client_id = $clientId
-    scope = $scope
+# -----------------------------
+# Step 1: Request a device code
+# -----------------------------
+$deviceCodeResponse = Invoke-RestMethod -Method Post `
+    -Uri "https://login.microsoftonline.com/$tenantId/oauth2/v2.0/devicecode" `
+    -ContentType "application/x-www-form-urlencoded" `
+    -Body @{
+        client_id = $clientId
+        scope = $scope
+    }
+
+# Show instructions to the user
+Write-Host $deviceCodeResponse.message
+
+# -----------------------------
+# Step 2: Poll for access token
+# -----------------------------
+$body = @{
+    grant_type  = "urn:ietf:params:oauth:grant-type:device_code"
+    client_id   = $clientId
+    device_code = $deviceCodeResponse.device_code
 }
 
-Write-Host "Go to $($deviceCodeResponse.verification_uri)"
-Write-Host "Enter this code: $($deviceCodeResponse.user_code)"
-
-# Step 2: Poll for token
-$token = $null
-while (-not $token) {
+do {
     Start-Sleep -Seconds $deviceCodeResponse.interval
     try {
-        $tokenResponse = Invoke-RestMethod -Uri "https://login.microsoftonline.com/consumers/oauth2/v2.0/token" -Method POST -Body @{
-            grant_type = "urn:ietf:params:oauth:grant-type:device_code"
-            client_id = $clientId
-            device_code = $deviceCodeResponse.device_code
-        }
-        $token = $tokenResponse.access_token
+        $tokenResponse = Invoke-RestMethod -Method Post `
+            -Uri "https://login.microsoftonline.com/$tenantId/oauth2/v2.0/token" `
+            -ContentType "application/x-www-form-urlencoded" `
+            -Body $body
     } catch {
-        # Ignore authorization_pending errors
-        if ($_.Exception.Response.StatusCode -ne 400) { throw $_ }
+        $tokenResponse = $null
     }
-}
+} while (-not $tokenResponse)
 
-Write-Host "Microsoft access token obtained."
+# -----------------------------
+# Step 3: Use the access token
+# -----------------------------
+$accessToken = $tokenResponse.access_token
+Write-Host "`nAccess Token:`n$accessToken"
 
-# Step 3: Xbox Live auth
-$xblBody = @{
-    Properties = @{
-        AuthMethod = "RPS"
-        SiteName = "user.auth.xboxlive.com"
-        RpsTicket = "d=$token"
-    }
-    RelyingParty = "http://auth.xboxlive.com"
-    TokenType = "JWT"
-}
-$xblResponse = Invoke-RestMethod -Uri "https://user.auth.xboxlive.com/user/authenticate" -Method POST -Body ($xblBody | ConvertTo-Json -Depth 10) -ContentType "application/json"
-$xblToken = $xblResponse.Token
-$uhs = $xblResponse.DisplayClaims.xui[0].uhs
-
-# Step 4: Minecraft auth
-$mcBody = @{ identityToken = "XBL3.0 x=$uhs;$xblToken" }
-$mcResponse = Invoke-RestMethod -Uri "https://api.minecraftservices.com/authentication/login_with_xbox" -Method POST -Body ($mcBody | ConvertTo-Json) -ContentType "application/json"
-$mcToken = $mcResponse.access_token
-
-# Step 5: Get Minecraft profile
-$headers = @{ Authorization = "Bearer $mcToken" }
-$profile = Invoke-RestMethod -Uri "https://api.minecraftservices.com/minecraft/profile" -Headers $headers
-
-Write-Host "`n===== MINECRAFT ACCOUNT INFO ====="
-Write-Host "Username: $($profile.name)"
-Write-Host "UUID: $($profile.id)"
-Write-Host "Access Token: $mcToken"
+# You can now use $accessToken in Authorization headers for Microsoft Graph API calls
