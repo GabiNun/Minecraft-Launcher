@@ -1,47 +1,58 @@
 $clientId = "ec859e96-84d8-4375-a43f-2d7d949d2ded"
-$redirectUri = "http://localhost"
 $scope = "XboxLive.signin offline_access"
 
-$authUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize?client_id=$clientId&response_type=code&redirect_uri=$redirectUri&scope=$scope"
-Start-Process $authUrl
-
-$code = Read-Host "Paste the code from the browser URL"
-
-$body = @{
+# Step 1: Request device code
+$deviceCodeResponse = Invoke-RestMethod -Uri "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode" -Method POST -Body @{
     client_id = $clientId
-    redirect_uri = $redirectUri
-    grant_type = "authorization_code"
-    code = $code
+    scope = $scope
 }
 
-$response = Invoke-RestMethod -Uri "https://login.microsoftonline.com/consumers/oauth2/v2.0/token" -Method POST -Body $body
-$accessToken = $response.access_token
+Write-Host "Go to $($deviceCodeResponse.verification_uri)"
+Write-Host "Enter this code: $($deviceCodeResponse.user_code)"
 
-$body = @{
+# Step 2: Poll for token
+$token = $null
+while (-not $token) {
+    Start-Sleep -Seconds $deviceCodeResponse.interval
+    try {
+        $tokenResponse = Invoke-RestMethod -Uri "https://login.microsoftonline.com/consumers/oauth2/v2.0/token" -Method POST -Body @{
+            grant_type = "urn:ietf:params:oauth:grant-type:device_code"
+            client_id = $clientId
+            device_code = $deviceCodeResponse.device_code
+        }
+        $token = $tokenResponse.access_token
+    } catch {
+        # Ignore authorization_pending errors
+        if ($_.Exception.Response.StatusCode -ne 400) { throw $_ }
+    }
+}
+
+Write-Host "Microsoft access token obtained."
+
+# Step 3: Xbox Live auth
+$xblBody = @{
     Properties = @{
         AuthMethod = "RPS"
         SiteName = "user.auth.xboxlive.com"
-        RpsTicket = "d=$accessToken"
+        RpsTicket = "d=$token"
     }
     RelyingParty = "http://auth.xboxlive.com"
     TokenType = "JWT"
 }
+$xblResponse = Invoke-RestMethod -Uri "https://user.auth.xboxlive.com/user/authenticate" -Method POST -Body ($xblBody | ConvertTo-Json -Depth 10) -ContentType "application/json"
+$xblToken = $xblResponse.Token
+$uhs = $xblResponse.DisplayClaims.xui[0].uhs
 
-$response = Invoke-RestMethod -Uri "https://user.auth.xboxlive.com/user/authenticate" -Method POST -Body ($body | ConvertTo-Json)
-$xblToken = $response.Token
+# Step 4: Minecraft auth
+$mcBody = @{ identityToken = "XBL3.0 x=$uhs;$xblToken" }
+$mcResponse = Invoke-RestMethod -Uri "https://api.minecraftservices.com/authentication/login_with_xbox" -Method POST -Body ($mcBody | ConvertTo-Json) -ContentType "application/json"
+$mcToken = $mcResponse.access_token
 
-$body = @{
-    identityToken = "XBL3.0 x=$($response.DisplayClaims.xui[0].uhs);$xblToken"
-}
-
-$response = Invoke-RestMethod -Uri "https://api.minecraftservices.com/authentication/login_with_xbox" -Method POST -Body ($body | ConvertTo-Json) -ContentType "application/json"
-$mcToken = $response.access_token
-
-$headers = @{ "Authorization" = "Bearer $mcToken" }
+# Step 5: Get Minecraft profile
+$headers = @{ Authorization = "Bearer $mcToken" }
 $profile = Invoke-RestMethod -Uri "https://api.minecraftservices.com/minecraft/profile" -Headers $headers
 
-$uuid = $profile.id
-$username = $profile.name
-
-Write-Output "Minecraft username: $username"
-Write-Output "UUID: $uuid"
+Write-Host "`n===== MINECRAFT ACCOUNT INFO ====="
+Write-Host "Username: $($profile.name)"
+Write-Host "UUID: $($profile.id)"
+Write-Host "Access Token: $mcToken"
