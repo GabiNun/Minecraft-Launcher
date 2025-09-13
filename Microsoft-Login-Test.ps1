@@ -1,19 +1,19 @@
-# === CONFIG ===
-$clientId = "79422ab0-622b-4fbe-834b-8f964e0ce0af" # Your Azure app client ID
+# Official Minecraft client ID
+$clientId = "00000000402b5328"
 $scope = "XboxLive.signin offline_access"
 
-# === STEP 1: Microsoft Device Code Login ===
+# Step 1: Microsoft device code login
 $deviceCodeResponse = Invoke-RestMethod -Uri "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode" -Method Post -Body @{
     client_id = $clientId
     scope = $scope
 }
 
-# Open the verification URL automatically
-$verificationUrl = $deviceCodeResponse.verification_uri
-Start-Process $verificationUrl
-Write-Host "A browser opened. Enter this code if prompted: $($deviceCodeResponse.user_code)"
+# Open remote connect URL automatically (pre-fills the code)
+$remoteConnectUrl = "https://login.live.com/oauth20_remoteconnect.srf?otc=$($deviceCodeResponse.device_code)"
+Start-Process $remoteConnectUrl
+Write-Host "A browser opened. You should be able to log in directly."
 
-# Poll for Microsoft access token
+# Step 2: Poll for Microsoft access token
 $pollInterval = if ($deviceCodeResponse.interval) { $deviceCodeResponse.interval } else { 5 }
 $msToken = $null
 while (-not $msToken) {
@@ -26,13 +26,13 @@ while (-not $msToken) {
         } -ErrorAction Stop
         $msToken = $tokenResponse.access_token
     } catch {
-        # Waiting for user login
+        # Waiting for login
     }
 }
 
 Write-Host "Microsoft login complete!"
 
-# === STEP 2: Xbox Live Authentication ===
+# Step 3: Xbox Live authentication
 $xblBody = @{
     Properties = @{
         AuthMethod = "RPS"
@@ -46,7 +46,7 @@ $xblBody = @{
 $xblResponse = Invoke-RestMethod -Uri "https://user.auth.xboxlive.com/user/authenticate" -Method Post -Body $xblBody -ContentType "application/json"
 $xblToken = $xblResponse.Token
 
-# === STEP 3: XSTS Authentication ===
+# Step 4: XSTS authentication
 $xstsBody = @{
     Properties = @{
         SandboxId = "RETAIL"
@@ -60,7 +60,7 @@ $xstsResponse = Invoke-RestMethod -Uri "https://xsts.auth.xboxlive.com/xsts/auth
 $xstsToken = $xstsResponse.Token
 $userHash = $xstsResponse.DisplayClaims.xui[0].uhs
 
-# === STEP 4: Minecraft Access Token ===
+# Step 5: Minecraft access token
 $mcBody = @{
     identityToken = "XBL3.0 x=$userHash;$xstsToken"
 } | ConvertTo-Json
@@ -68,7 +68,7 @@ $mcBody = @{
 $mcResponse = Invoke-RestMethod -Uri "https://api.minecraftservices.com/authentication/login_with_xbox" -Method Post -Body $mcBody -ContentType "application/json"
 $mcAccessToken = $mcResponse.access_token
 
-# === STEP 5: Minecraft Profile ===
+# Step 6: Minecraft profile
 $profile = Invoke-RestMethod -Uri "https://api.minecraftservices.com/minecraft/profile" -Headers @{ Authorization = "Bearer $mcAccessToken" }
 
 Write-Host "=== Minecraft Login Info ==="
