@@ -90,16 +90,19 @@ $mcResponse = Invoke-RestMethod -Method Post `
     -ContentType "application/json" `
     -Body $bodyMinecraft
 
+# Get Minecraft access token
+$mcAccessToken = $mcResponse.access_token
+
 # -----------------------------
 # 5. Get Minecraft Profile (UUID & username)
 # -----------------------------
 $mcProfile = Invoke-RestMethod -Method Get `
     -Uri "https://api.minecraftservices.com/minecraft/profile" `
     -Headers @{ Authorization = "Bearer $mcAccessToken" }
-$Token = $mcResponse.access_token
+
 $Username = $mcProfile.name
 $uuid = $mcProfile.id
 
-Write-Host "`nMinecraft Access Token:`n$Token"
+Write-Host "`nMinecraft Access Token:`n$mcAccessToken"
 Write-Host "`nMinecraft Username: $Username"
 Write-Host "Minecraft UUID: $uuid"
