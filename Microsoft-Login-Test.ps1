@@ -1,7 +1,6 @@
 # Configuration
 $tenantId = "ea3b1daf-a836-4b75-abac-e38ea3cec163"
 $clientId = "ec859e96-84d8-4375-a43f-2d7d949d2ded"
-$scope = "https://graph.microsoft.com/.default offline_access"
 
 # Step 1: Request a device code
 $deviceCodeResponse = Invoke-RestMethod -Method Post `
@@ -9,7 +8,7 @@ $deviceCodeResponse = Invoke-RestMethod -Method Post `
     -ContentType "application/x-www-form-urlencoded" `
     -Body @{
         client_id = $clientId
-        scope = $scope
+        scope = "https://graph.microsoft.com/.default offline_access"
     }
 
 # Open the verification URL in the browser automatically
