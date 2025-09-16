@@ -1,3 +1,4 @@
+irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/server/Get-Java.ps1 | iex
 New-Item "$env:APPDATA\Minecraft Server" -ItemType Directory -Force | Out-Null
 Set-Content "$env:APPDATA\Minecraft Server\eula.txt" eula=true
 $ProgressPreference = 'SilentlyContinue'
