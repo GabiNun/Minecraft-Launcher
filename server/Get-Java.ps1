@@ -1,8 +1,4 @@
-$JavaInstalled = $false
-if (Get-Command java -Ea 0) {
-    $JavaInstalled = $true
-}
-
-if false {
- winget install Oracle.JDK.21
+if (-not (Get-Command java -Ea 0)) {
+    Write-Host "Java not found. Installing Oracle JDK 21..."
+    winget install --id Oracle.JDK.21 -e
 }
