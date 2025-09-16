@@ -1,3 +1,4 @@
+irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/server/Get-Java.ps1 | iex
 ni $env:APPDATA\.minecraft\assets\indexes -ItemType Directory -Force | Out-Null
 $loginFile = "$env:APPDATA\.minecraft\login.json"
 
