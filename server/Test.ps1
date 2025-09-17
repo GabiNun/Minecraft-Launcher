@@ -23,4 +23,4 @@ if (-not (Test-Path "client.jar")) {
 
 $classpathString = "$([string]::Join(';', (gci libraries -r -fi *.jar).FullName));client.jar"
 
-java -cp $classpathString net.minecraft.client.main.Main --version 1.21.8 --accessToken e
+java -cp $classpathString net.minecraft.client.main.Main --version 1.21.8 --accessToken None
