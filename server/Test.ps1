@@ -27,6 +27,6 @@ foreach ($lib in $json.libraries) {
     }
 }
 
-$cp = ((gci -R -F *.jar | % { $_.FullName }) -join ";") + ";client.jar"
+$cp = ((gci -R -Fi *.jar | % { $_.FullName }) -join ";") + ";client.jar"
 
 java -cp $cp net.minecraft.client.main.Main --version 1.21.8 --uuid $login.profile.id --username $login.profile.name --accessToken $login.token
