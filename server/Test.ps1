@@ -11,3 +11,7 @@ foreach ($lib in $json.libraries) {
         Invoke-WebRequest $lib.downloads.artifact.url -OutFile $dest
     }
 }
+
+if (-not (Test-Path "client.jar")) {
+    Invoke-WebRequest -Uri "https://piston-data.mojang.com/v1/objects/a19d9badbea944a4369fd0059e53bf7286597576/client.jar" -OutFile "client.jar"
+}
