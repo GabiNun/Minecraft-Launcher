@@ -3,6 +3,7 @@ $ProgressPreference = 'SilentlyContinue'
 if (-not (Test-Path "$env:APPDATA\.minecraft")) {
     ni $env:APPDATA\.minecraft\assets\indexes -I D | Out-Null
 }
+
 Set-Location $env:APPDATA\.minecraft
 
 if (Test-Path login.json) {
@@ -31,8 +32,12 @@ foreach ($lib in $json.libraries) {
 $assetIndex = Get-Content "assets\indexes\26.json" | ConvertFrom-Json
 
 foreach ($entry in $assetIndex.objects.PSObject.Properties) {
-    if (-not (Test-Path ("assets\objects\" + $entry.Value.hash.Substring(0,2)))) { New-Item -ItemType Directory -Force -Path ("assets\objects\" + $entry.Value.hash.Substring(0,2)) | Out-Null }
-    Invoke-WebRequest -Uri ("https://resources.download.minecraft.net/" + $entry.Value.hash.Substring(0,2) + "/" + $entry.Value.hash) -OutFile ("assets\objects\" + $entry.Value.hash.Substring(0,2) + "\" + $entry.Value.hash)
+    if ($entry.Name -like "minecraft/sounds/*") { continue }
+    $path = "assets\objects\" + $entry.Value.hash.Substring(0,2) + "\" + $entry.Value.hash
+    if (-not (Test-Path (Split-Path $path -Parent))) { New-Item -ItemType Directory -Force -Path (Split-Path $path -Parent) | Out-Null }
+    if (-not (Test-Path $path)) {
+        Invoke-WebRequest -Uri ("https://resources.download.minecraft.net/" + $entry.Value.hash.Substring(0,2) + "/" + $entry.Value.hash) -OutFile $path
+    }
 }
 
 $cp = ((gci -R -Fi *.jar | % { $_.FullName }) -join ";") + ";client.jar"
