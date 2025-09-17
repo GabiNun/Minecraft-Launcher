@@ -27,6 +27,15 @@ foreach ($lib in $json.libraries) {
     }
 }
 
+$assetIndex = Invoke-RestMethod -Uri "https://piston-meta.mojang.com/v1/packages/7db0407a8e9e9a0520b5e3ecba3a3e4650169cd6/26.json"
+
+foreach ($entry in $assetIndex.objects.GetEnumerator()) {
+    if (-not (Test-Path ("assets\objects\" + $entry.Value.hash.Substring(0,2)))) {
+        New-Item -ItemType Directory -Force -Path ("assets\objects\" + $entry.Value.hash.Substring(0,2)) | Out-Null
+    }
+    Invoke-WebRequest -Uri ("https://resources.download.minecraft.net/" + $entry.Value.hash.Substring(0,2) + "/" + $entry.Value.hash) -OutFile ("assets\objects\" + $entry.Value.hash.Substring(0,2) + "\" + $entry.Value.hash)
+}
+
 $cp = ((gci -R -Fi *.jar | % { $_.FullName }) -join ";") + ";client.jar"
 
 java -cp $cp net.minecraft.client.main.Main --version 1.21.8 --uuid $login.profile.id --username $login.profile.name --accessToken $login.token
