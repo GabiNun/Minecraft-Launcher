@@ -6,12 +6,9 @@ if (-not (Test-Path "$env:APPDATA\.minecraft")) {
 Set-Location $env:APPDATA\.minecraft
 
 if (Test-Path login.json) {
-    $login = Get-Content $loginFile -Raw | ConvertFrom-Json
+    $login = Get-Content login.json -Raw | ConvertFrom-Json
 } else {
     irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Microsoft-Login.ps1 | iex
-    ni login.json | Out-Null
-    Get-Microsoft-Minecraft-Identity
-    $login = Get-Content login.json -Raw | ConvertFrom-Json
 }
 
 $json = Invoke-RestMethod "https://piston-meta.mojang.com/v1/packages/db4d7600e0d402a7ba7ad16ce748098f4c704d75/1.21.8.json"
