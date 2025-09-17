@@ -1,3 +1,5 @@
+$ProgressPreference = 'SilentlyContinue'
+
 $json = Invoke-RestMethod -Uri "https://piston-meta.mojang.com/v1/packages/db4d7600e0d402a7ba7ad16ce748098f4c704d75/1.21.8.json"
 foreach ($lib in $json.libraries) {
     $artifact = $lib.downloads.artifact
