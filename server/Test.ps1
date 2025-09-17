@@ -15,3 +15,7 @@ foreach ($lib in $json.libraries) {
 if (-not (Test-Path "client.jar")) {
     Invoke-WebRequest "https://piston-data.mojang.com/v1/objects/a19d9badbea944a4369fd0059e53bf7286597576/client.jar" -OutFile "client.jar"
 }
+
+$classpathString = "$([string]::Join(';', (gci libraries -r -fi *.jar).FullName));client.jar"
+
+java -cp $classpathString net.minecraft.client.main.Main --version 1.21.8 --accessToken e
