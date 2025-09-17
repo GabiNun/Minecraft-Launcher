@@ -1,53 +1,45 @@
 irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/server/Get-Java.ps1 | iex
-ni $env:APPDATA\.minecraft\assets\indexes -ItemType Directory -Force | Out-Null
+$ProgressPreference = 'SilentlyContinue'
 
-if (Test-Path $loginFile) {
-    $login = Get-Content "$env:APPDATA\.minecraft\login.json" -Raw | ConvertFrom-Json
+if (-not (Test-Path "$env:APPDATA\.minecraft")) {
+    ni $env:APPDATA\.minecraft\assets\indexes -I D | Out-Null
+}
+Set-Location $env:APPDATA\.minecraft
+
+if (Test-Path login.json) {
+    $login = Get-Content login.json -Raw | ConvertFrom-Json
 } else {
     irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Microsoft-Login.ps1 | iex
 }
 
-$ProgressPreference = 'SilentlyContinue'
-$manifest = irm launchermeta.mojang.com/mc/game/version_manifest.json
-$latestReleaseUrl = ($manifest.versions | ? id -eq $manifest.latest.release).url
-$latestReleaseData = irm $latestReleaseUrl
-$json = irm $latestReleaseData.assetIndex.url
-
-$indexFilePath = "$env:APPDATA\.minecraft\assets\indexes\$($latestReleaseData.assets).json"
-$filePath = "$env:APPDATA\.minecraft\client.jar"
-
-if (-not (Test-Path $filePath)) {
-    irm $latestReleaseData.downloads.client.url -OutFile $filePath
+if (-not (Test-Path "client.jar")) {
+    Invoke-WebRequest "https://piston-data.mojang.com/v1/objects/a19d9badbea944a4369fd0059e53bf7286597576/client.jar" -OutFile "client.jar"
 }
 
-if (-not (Test-Path $indexFilePath)) {
-    irm $latestReleaseData.assetIndex.url -OutFile $indexFilePath
-}
-
-foreach ($lib in $latestReleaseData.libraries) {
-    if ($lib.downloads -and $lib.downloads.artifact) {
-        $skip = ($lib.rules -and ($lib.rules | Where-Object { $_.os -and ($_.os.name -match 'linux|macos|arm64') })) -or ($lib.downloads.artifact.path.ToLower() -match 'linux|macos|arm64')
-        if (-not $skip) {
-            $file = Join-Path $env:APPDATA ".minecraft\libraries\$($lib.downloads.artifact.path)"
-            if (-not (Test-Path (Split-Path $file))) { New-Item -ItemType Directory -Path (Split-Path $file) -Force | Out-Null }
-            if (-not (Test-Path $file)) { irm $lib.downloads.artifact.url -OutFile $file }
+Invoke-WebRequest "https://piston-meta.mojang.com/v1/packages/7db0407a8e9e9a0520b5e3ecba3a3e4650169cd6/26.json" -OutFile "assets\indexes\26.json"
+$json = Invoke-RestMethod "https://piston-meta.mojang.com/v1/packages/db4d7600e0d402a7ba7ad16ce748098f4c704d75/1.21.8.json"
+foreach ($lib in $json.libraries) {
+    if ($null -ne $lib.downloads.artifact -and $lib.downloads.artifact.url -and $lib.downloads.artifact.path) {
+        $dest = Join-Path -Path "libraries" -ChildPath $lib.downloads.artifact.path
+        $folder = Split-Path $dest -Parent
+        if (-not (Test-Path $folder)) {
+            New-Item -ItemType Directory -Force -Path $folder | Out-Null
         }
+        Invoke-WebRequest $lib.downloads.artifact.url -OutFile $dest
     }
 }
 
-foreach ($file in $json.objects.PSObject.Properties) {
-    $path = $file.Name
-    if ($path -like "minecraft/sounds*" -or ($path -like "minecraft/lang/*.json" -and -not $path.EndsWith("en_us.json"))) { continue }
-    $hash = $file.Value.hash
-    $subdir = $hash.Substring(0, 2)
-    $dest = "$env:APPDATA\.minecraft\assets\objects\$subdir\$hash"
-    if (-not (Test-Path $dest)) {
-        $dir = Split-Path $dest
-        if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
-        irm -Uri "https://resources.download.minecraft.net/$subdir/$hash" -OutFile $dest
+$assetIndex = Get-Content "assets\indexes\26.json" | ConvertFrom-Json
+
+foreach ($entry in $assetIndex.objects.PSObject.Properties) {
+    if ($entry.Name -like "minecraft/sounds/*") { continue }
+    $path = "assets\objects\" + $entry.Value.hash.Substring(0,2) + "\" + $entry.Value.hash
+    if (-not (Test-Path (Split-Path $path -Parent))) { New-Item -ItemType Directory -Force -Path (Split-Path $path -Parent) | Out-Null }
+    if (-not (Test-Path $path)) {
+        Invoke-WebRequest -Uri ("https://resources.download.minecraft.net/" + $entry.Value.hash.Substring(0,2) + "/" + $entry.Value.hash) -OutFile $path
     }
 }
 
-$classpathString = "$([string]::Join(';', (gci $env:APPDATA\.minecraft\libraries -r -fi *.jar).FullName));$env:APPDATA\.minecraft\client.jar"
+$cp = ((gci -R -Fi *.jar | % { $_.FullName }) -join ";") + ";client.jar"
 
-java -cp $classpathString net.minecraft.client.main.Main --version $latestReleaseData.id --gameDir "$env:APPDATA\.minecraft" --assetsDir "$env:APPDATA\.minecraft\assets" --assetIndex $latestReleaseData.assets --uuid $login.profile.id --username $login.profile.name --versionType release --accessToken $login.token --userType msa
+java -cp $cp net.minecraft.client.main.Main --version 1.21.8 --assetsDir assets -assetIndex 26 --uuid $login.profile.id --username $login.profile.name --accessToken $login.token
