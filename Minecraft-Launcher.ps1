@@ -1,14 +1,10 @@
 irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/server/Get-Java.ps1 | iex
 ni $env:APPDATA\.minecraft\assets\indexes -ItemType Directory -Force | Out-Null
-$loginFile = "$env:APPDATA\.minecraft\login.json"
 
 if (Test-Path $loginFile) {
-    $login = Get-Content $loginFile -Raw | ConvertFrom-Json
+    $login = Get-Content "$env:APPDATA\.minecraft\login.json" -Raw | ConvertFrom-Json
 } else {
     irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Microsoft-Login.ps1 | iex
-    ni $loginFile | Out-Null
-    Get-Microsoft-Minecraft-Identity
-    $login = Get-Content $loginFile -Raw | ConvertFrom-Json
 }
 
 $ProgressPreference = 'SilentlyContinue'
