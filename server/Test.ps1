@@ -27,6 +27,5 @@ foreach ($lib in $json.libraries) {
     }
 }
 
-$classpathString = "$([string]::Join(';', (gci libraries -r -fi *.jar).FullName));client.jar"
 
-java -cp $classpathString net.minecraft.client.main.Main --version 1.21.8 --uuid $login.profile.id --username $login.profile.name --accessToken $login.token
+java -cp "libraries/*;client.jar" net.minecraft.client.main.Main --version 1.21.8 --uuid $login.profile.id --username $login.profile.name --accessToken $login.token
