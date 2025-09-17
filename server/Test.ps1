@@ -37,4 +37,4 @@ foreach ($entry in $assetIndex.objects.PSObject.Properties) {
 
 $cp = ((gci -R -Fi *.jar | % { $_.FullName }) -join ";") + ";client.jar"
 
-java -cp $cp net.minecraft.client.main.Main --version 1.21.8 --assetsDir assets -assetIndex assets\indexes --uuid $login.profile.id --username $login.profile.name --accessToken $login.token
+java -cp $cp net.minecraft.client.main.Main --version 1.21.8 --assetsDir assets -assetIndex assets\indexes26.json --uuid $login.profile.id --username $login.profile.name --accessToken $login.token
