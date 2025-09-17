@@ -1,7 +1,7 @@
 $ProgressPreference = 'SilentlyContinue'
 
 if (-not (Test-Path "$env:APPDATA\.minecraft")) {
-    ni $env:APPDATA\.minecraft\assets\indexes -ItemType Directory | Out-Null
+    ni $env:APPDATA\.minecraft\assets\indexes -I D | Out-Null
 }
 Set-Location $env:APPDATA\.minecraft
 
