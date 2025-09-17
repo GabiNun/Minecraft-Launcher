@@ -27,4 +27,6 @@ foreach ($lib in $json.libraries) {
     }
 }
 
-java -cp "libraries/*;client.jar" net.minecraft.client.main.Main --version 1.21.8 --uuid $login.profile.id --username $login.profile.name --accessToken $login.token
+$cp = (Get-ChildItem -R -F *.jar | % { $_.FullName } | -join ';') + ";client.jar"
+
+java -cp $cp net.minecraft.client.main.Main --version 1.21.8 --uuid $login.profile.id --username $login.profile.name --accessToken $login.token
