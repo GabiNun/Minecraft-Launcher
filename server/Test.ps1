@@ -1,5 +1,10 @@
 $ProgressPreference = 'SilentlyContinue'
 
+if (-not (Test-Path "$env:APPDATA\.minecraft")) {
+    ni $env:APPDATA\.minecraft -ItemType Directory | Out-Null
+}
+Set-Path $env:APPDATA\.minecraft
+
 $json = Invoke-RestMethod "https://piston-meta.mojang.com/v1/packages/db4d7600e0d402a7ba7ad16ce748098f4c704d75/1.21.8.json"
 foreach ($lib in $json.libraries) {
     if ($null -ne $lib.downloads.artifact -and $lib.downloads.artifact.url -and $lib.downloads.artifact.path) {
