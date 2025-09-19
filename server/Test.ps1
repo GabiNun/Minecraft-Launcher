@@ -1,90 +1,69 @@
 #              irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/server/Test.ps1 | iex
 
-param (
-    [string]$ClientId = 'ec859e96-84d8-4375-a43f-2d7d949d2ded',
-    [string]$Tenant = 'consumers'
-)
+# Variables
+$tenantId = "ea3b1daf-a836-4b75-abac-e38ea3cec163"
+$clientId = "66cf6e5a-b98b-4e05-b2bd-568d6e30828e"
+$clientSecret = "BpC8Q~FdVflzQWMpaP16MS1VaoH5_4lEsgWrtaxP"  # Your client secret
+$redirectUri = "http://localhost"  # Your redirect URI
 
-# Azure portal (for app management / API permissions):
-# https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade
+# Function to get an access token
+function Get-AccessToken {
+    param (
+        [string]$tenantId,
+        [string]$clientId,
+        [string]$clientSecret,
+        [string]$redirectUri
+    )
 
-$deviceCodeEndpoint = "https://login.microsoftonline.com/$Tenant/oauth2/v2.0/devicecode"
-$tokenEndpoint = "https://login.microsoftonline.com/$Tenant/oauth2/v2.0/token"
-$scopes = 'XboxLive.signin offline_access openid'
-
-$deviceResp = Invoke-RestMethod -Method Post -Uri $deviceCodeEndpoint -Body @{ client_id = $ClientId; scope = $scopes }
-Write-Host "Visit $($deviceResp.verification_uri) and enter code: $($deviceResp.user_code)"
-
-$pollInterval = [int]$deviceResp.interval
-
-do {
-    Start-Sleep -Seconds $pollInterval
-    try {
-        $tokenResp = Invoke-RestMethod -Method Post -Uri $tokenEndpoint -Body @{
-            client_id    = $ClientId
-            grant_type   = 'urn:ietf:params:oauth:grant-type:device_code'
-            device_code  = $deviceResp.device_code
-        }
-        break
+    $body = @{
+        client_id     = $clientId
+        scope         = "https://graph.microsoft.com/.default"
+        client_secret = $clientSecret
+        grant_type    = "client_credentials"
     }
-    catch {
-        $status = $_.Exception.Response.StatusCode.value__
-        if ($status -eq 400) {
-            $body = $_.Exception.Response.GetResponseStream() |
-                   % { New-Object System.IO.StreamReader($_) } |
-                   % { $_.ReadToEnd() }
-            if ($body -match 'authorization_pending') { continue }
-            if ($body -match 'authorization_declined') { throw 'User declined authorization' }
-            throw $body
-        }
-        else { throw $_ }
-    }
-} while ($true)
 
-$msAccessToken = $tokenResp.access_token
-
-$headers = @{ 'Accept' = 'application/json'; 'Content-Type' = 'application/json' }
-$bodyXbox = @{
-    Properties = @{
-        AuthMethod = 'RPS'
-        SiteName   = 'user.auth.xboxlive.com'
-        RpsTicket  = $msAccessToken
-    }
-    RelyingParty = 'http://auth.xboxlive.com'
-    TokenType     = 'JWT'
-} | ConvertTo-Json -Depth 10
-
-try {
-    $xboxResp = Invoke-RestMethod -Method Post -Uri 'https://user.auth.xboxlive.com/user/authenticate' -Headers $headers -Body $bodyXbox
-}
-catch {
-    $bodyXbox2 = $bodyXbox -replace $msAccessToken, ("d=" + $msAccessToken)
-    $xboxResp = Invoke-RestMethod -Method Post -Uri 'https://user.auth.xboxlive.com/user/authenticate' -Headers $headers -Body $bodyXbox2
+    $response = Invoke-RestMethod -Uri "https://login.microsoftonline.com/$tenantId/oauth2/v2.0/token" -Method Post -Body $body
+    return $response.access_token
 }
 
-$xboxToken = $xboxResp.Token
-$userHash  = $xboxResp.DisplayClaims.xui[0].uhs
+# Function to get user information
+function Get-UserInformation {
+    param (
+        [string]$accessToken
+    )
 
-$xstsBody = @{
-    Properties = @{
-        SandboxId  = 'RETAIL'
-        UserTokens = @($xboxToken)
+    $headers = @{
+        Authorization = "Bearer $accessToken"
     }
-    RelyingParty = 'rp://api.minecraftservices.com/'
-    TokenType     = 'JWT'
-} | ConvertTo-Json -Depth 10
 
-$xstsResp = Invoke-RestMethod -Method Post -Uri 'https://xsts.auth.xboxlive.com/xsts/authorize' -Headers $headers -Body $xstsBody
-$xstsToken = $xstsResp.Token
+    $response = Invoke-RestMethod -Uri "https://graph.microsoft.com/v1.0/me" -Method Get -Headers $headers
+    return $response
+}
 
-$identityToken = "XBL3.0 x=$userHash;$xstsToken"
-$mcLoginBody = @{ identityToken = $identityToken } | ConvertTo-Json
-$mcResp = Invoke-RestMethod -Method Post -Uri 'https://api.minecraftservices.com/authentication/login_with_xbox' -Headers @{ 'Content-Type' = 'application/json' } -Body $mcLoginBody
+# Function to get Minecraft information
+function Get-MinecraftInformation {
+    param (
+        [string]$accessToken
+    )
 
-$mcAccessToken = $mcResp.access_token
+    $headers = @{
+        Authorization = "Bearer $accessToken"
+    }
 
-$profile = Invoke-RestMethod -Method Get -Uri 'https://api.minecraftservices.com/minecraft/profile' -Headers @{ Authorization = "Bearer $mcAccessToken" }
+    $response = Invoke-RestMethod -Uri "https://api.minecraftservices.com/minecraft/profile" -Method Get -Headers $headers
+    return $response
+}
 
-Write-Host "Minecraft Access Token: $mcAccessToken"
-Write-Host "UUID (Profile ID): $($profile.id)"
-Write-Host "Username: $($profile.name)"
+# Main script
+$accessToken = Get-AccessToken -tenantId $tenantId -clientId $clientId -clientSecret $clientSecret -redirectUri $redirectUri
+
+$userInfo = Get-UserInformation -accessToken $accessToken
+Write-Output "User Information:"
+Write-Output "Display Name: $($userInfo.displayName)"
+Write-Output "User Principal Name: $($userInfo.userPrincipalName)"
+
+$minecraftInfo = Get-MinecraftInformation -accessToken $accessToken
+Write-Output "Minecraft Information:"
+Write-Output "UUID: $($minecraftInfo.id)"
+Write-Output "Name: $($minecraftInfo.name)"
+Write-Output "Access Token: $accessToken"
