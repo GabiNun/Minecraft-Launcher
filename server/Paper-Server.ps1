@@ -9,13 +9,9 @@ if (-not (Test-Path eula.txt)) {
     Set-Content eula.txt eula=true
 }
 
-$latestVersion = (irm api.papermc.io/v2/projects/paper).versions[-1]
-$latestBuild = (irm api.papermc.io/v2/projects/paper/versions/$latestVersion).builds[-1]
-$downloadName = (irm api.papermc.io/v2/projects/paper/versions/$latestVersion/builds/$latestBuild).downloads.application.name
-
 if (-not (Test-Path server.jar)) {
     $ProgressPreference = 'SilentlyContinue'
-    irm api.papermc.io/v2/projects/paper/versions/$latestVersion/builds/$latestBuild/downloads/$downloadName -o server.jar
+    irm fill-data.papermc.io/v1/objects/8de7c52c3b02403503d16fac58003f1efef7dd7a0256786843927fa92ee57f1e/paper-1.21.8-60.jar -o server.jar
 }
 
 
