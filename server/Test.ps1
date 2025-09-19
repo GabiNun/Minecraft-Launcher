@@ -17,7 +17,7 @@ function Get-AccessToken {
 
     $body = @{
         client_id     = $clientId
-        scope         = "https://graph.microsoft.com/.default https://api.minecraftservices.com/.default"
+        scope         = "https://graph.microsoft.com/.default"
         client_secret = $clientSecret
         grant_type    = "client_credentials"
     }
