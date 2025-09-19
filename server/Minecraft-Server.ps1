@@ -3,9 +3,8 @@ $ProgressPreference = 'SilentlyContinue'
 
 if (-not (Test-Path "$env:APPDATA\Minecraft Server")) {
     ni "$env:APPDATA\Minecraft Server" -I D | Out-Null
+    Set-Location "$env:APPDATA\Minecraft Server"
 }
-
-Set-Location "$env:APPDATA\Minecraft Server"
 
 if (-not (Test-Path eula.txt)) {
     Set-Content eula.txt eula=true
