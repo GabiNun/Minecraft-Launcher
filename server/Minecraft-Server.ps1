@@ -10,7 +10,6 @@ if (-not (Test-Path eula.txt)) {
 }
 
 if (-not (Test-Path server.jar)) {
-    $ProgressPreference = 'SilentlyContinue'
     Invoke-WebRequest piston-data.mojang.com/v1/objects/6bce4ef400e4efaa63a13d5e6f6b500be969ef81/server.jar -o server.jar
 }
 
