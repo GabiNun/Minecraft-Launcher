@@ -1,4 +1,5 @@
 irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/server/Get-Java.ps1 | iex
+$ProgressPreference = 'SilentlyContinue'
 
 if (-not (Test-Path "$env:APPDATA\Minecraft Server")) {
     ni "$env:APPDATA\Minecraft Server" -I D | Out-Null
@@ -10,14 +11,8 @@ if (-not (Test-Path eula.txt)) {
     Set-Content eula.txt eula=true
 }
 
-$ProgressPreference = 'SilentlyContinue'
-
-$manifest = irm launchermeta.mojang.com/mc/game/version_manifest.json
-$filePath = "$env:APPDATA\Minecraft Server\server.jar"
-if (!(Test-Path $filePath)) {
-  $latestReleaseUrl=($manifest.versions | ? id -eq $manifest.latest.release).url
-  irm (irm $latestReleaseUrl).downloads.server.url -o $filePath
+if (-not (Test-Path server.jar)) {
+    irm piston-data.mojang.com/v1/objects/6bce4ef400e4efaa63a13d5e6f6b500be969ef81/server.jar -o server.jar
 }
 
-Set-Location "$env:APPDATA\Minecraft Server"
 & java -jar server.jar nogui
