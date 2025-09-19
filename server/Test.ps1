@@ -1,3 +1,5 @@
+#              irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/server/Test.ps1 | iex
+
 param (
     [string]$ClientId = 'ec859e96-84d8-4375-a43f-2d7d949d2ded',
     [string]$Tenant = 'consumers'
