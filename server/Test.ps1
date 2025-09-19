@@ -17,7 +17,7 @@ function Get-AccessToken {
 
     $body = @{
         client_id     = $clientId
-        scope         = "https://graph.microsoft.com/.default"
+        scope         = "https://graph.microsoft.com/.default https://api.minecraftservices.com/.default"
         client_secret = $clientSecret
         grant_type    = "client_credentials"
     }
@@ -36,8 +36,12 @@ function Get-UserInformation {
         Authorization = "Bearer $accessToken"
     }
 
-    $response = Invoke-RestMethod -Uri "https://graph.microsoft.com/v1.0/me" -Method Get -Headers $headers
-    return $response
+    try {
+        $response = Invoke-RestMethod -Uri "https://graph.microsoft.com/v1.0/me" -Method Get -Headers $headers
+        return $response
+    } catch {
+        Write-Error "Error retrieving user information: $_"
+    }
 }
 
 # Function to get Minecraft information
@@ -50,20 +54,31 @@ function Get-MinecraftInformation {
         Authorization = "Bearer $accessToken"
     }
 
-    $response = Invoke-RestMethod -Uri "https://api.minecraftservices.com/minecraft/profile" -Method Get -Headers $headers
-    return $response
+    try {
+        $response = Invoke-RestMethod -Uri "https://api.minecraftservices.com/minecraft/profile" -Method Get -Headers $headers
+        return $response
+    } catch {
+        Write-Error "Error retrieving Minecraft information: $_"
+    }
 }
 
 # Main script
 $accessToken = Get-AccessToken -tenantId $tenantId -clientId $clientId -clientSecret $clientSecret -redirectUri $redirectUri
 
-$userInfo = Get-UserInformation -accessToken $accessToken
-Write-Output "User Information:"
-Write-Output "Display Name: $($userInfo.displayName)"
-Write-Output "User Principal Name: $($userInfo.userPrincipalName)"
+if ($accessToken) {
+    $userInfo = Get-UserInformation -accessToken $accessToken
+    if ($userInfo) {
+        Write-Output "User Information:"
+        Write-Output "Display Name: $($userInfo.displayName)"
+        Write-Output "User Principal Name: $($userInfo.userPrincipalName)"
+    }
 
-$minecraftInfo = Get-MinecraftInformation -accessToken $accessToken
-Write-Output "Minecraft Information:"
-Write-Output "UUID: $($minecraftInfo.id)"
-Write-Output "Name: $($minecraftInfo.name)"
-Write-Output "Access Token: $accessToken"
+    $minecraftInfo = Get-MinecraftInformation -accessToken $accessToken
+    if ($minecraftInfo) {
+        Write-Output "Minecraft Information:"
+        Write-Output "UUID: $($minecraftInfo.id)"
+        Write-Output "Name: $($minecraftInfo.name)"
+    }
+} else {
+    Write-Error "Failed to retrieve access token."
+}
