@@ -44,4 +44,3 @@ function Get-Microsoft-Minecraft-Identity {
 }
 
 Get-Microsoft-Minecraft-Identity
-$login = Get-Content login.json -Raw | ConvertFrom-Json
