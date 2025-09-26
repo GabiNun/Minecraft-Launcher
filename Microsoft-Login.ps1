@@ -1,5 +1,12 @@
 function Get-Microsoft-Minecraft-Identity {
 
+    $loginFile = "$env:APPDATA\.minecraft\login.json"
+    if (Test-Path login.json) {
+        $login = Get-Content login.json -Raw | ConvertFrom-Json
+        return
+    }
+    ni $loginFile | Out-Null
+
     Start-Process "https://login.live.com/oauth20_authorize.srf?client_id=00000000402b5328&response_type=code&redirect_uri=https://login.live.com/oauth20_desktop.srf&scope=XboxLive.signin offline_access"
     $code = Read-Host "`nPaste in the value after code= and before &lc=1033)"
 
@@ -32,9 +39,6 @@ function Get-Microsoft-Minecraft-Identity {
 
     $token = (Invoke-RestMethod -Method Post -Uri "https://api.minecraftservices.com/authentication/login_with_xbox" -Headers @{ "Content-Type"="application/json" } -Body (@{identityToken=$identity} | ConvertTo-Json)).access_token
     $profile = Invoke-RestMethod "https://api.minecraftservices.com/minecraft/profile" -Headers @{Authorization="Bearer $token"}
-
-    $loginFile = "$env:APPDATA\.minecraft\login.json"
-    ni $loginFile | Out-Null
 
     Set-Content $loginFile -Value (@{token=$token; profile=$profile} | ConvertTo-Json -Depth 6)
 }
