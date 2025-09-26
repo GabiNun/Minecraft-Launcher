@@ -41,4 +41,5 @@ function Get-Microsoft-Minecraft-Identity {
 
     Set-Content login.json -Value (@{token=$token; profile=$profile} | ConvertTo-Json -Depth 6)
 }
+
 Get-Microsoft-Minecraft-Identity
