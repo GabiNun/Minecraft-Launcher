@@ -6,11 +6,7 @@ if (-not (Test-Path "$env:APPDATA\.minecraft")) {
 }
 Set-Location $env:APPDATA\.minecraft
 
-if (Test-Path login.json) {
-    $login = Get-Content login.json -Raw | ConvertFrom-Json
-} else {
-    irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Microsoft-Login.ps1 | iex
-}
+irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Microsoft-Login.ps1 | iex
 
 if (-not (Test-Path "client.jar")) {
     Invoke-WebRequest "https://piston-data.mojang.com/v1/objects/a19d9badbea944a4369fd0059e53bf7286597576/client.jar" -OutFile "client.jar"
