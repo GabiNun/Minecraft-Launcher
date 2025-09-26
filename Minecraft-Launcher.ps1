@@ -33,6 +33,7 @@ foreach ($entry in $assetIndex.objects.PSObject.Properties) {
     $path = "assets\objects\" + $entry.Value.hash.Substring(0,2) + "\" + $entry.Value.hash
     if (-not (Test-Path (Split-Path $path -Parent))) { New-Item -ItemType Directory -Force -Path (Split-Path $path -Parent) | Out-Null }
     if (-not (Test-Path $path)) {
+        Write-Host "Downloading: $($entry.Name) -> $path"
         Invoke-WebRequest ("https://resources.download.minecraft.net/" + $entry.Value.hash.Substring(0,2) + "/" + $entry.Value.hash) -OutFile $path
     }
 }
