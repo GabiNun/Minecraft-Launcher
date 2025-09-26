@@ -1,7 +1,6 @@
 function Get-Microsoft-Minecraft-Identity {
 
     if (Test-Path login.json) {
-        $login = Get-Content login.json -Raw | ConvertFrom-Json
         return
     }
     ni login.json | Out-Null
