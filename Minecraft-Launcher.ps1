@@ -30,6 +30,7 @@ $assetIndex = Get-Content "assets\indexes\26.json" | ConvertFrom-Json
 
 foreach ($entry in $assetIndex.objects.PSObject.Properties) {
     if ($entry.Name -like "minecraft/sounds/*") { continue }
+    if ($entry.Name -like "minecraft/lang/*.json" -and $entry.Name -notlike "minecraft/lang/en_us.json") { continue }
     $path = "assets\objects\" + $entry.Value.hash.Substring(0,2) + "\" + $entry.Value.hash
     if (-not (Test-Path (Split-Path $path -Parent))) { New-Item -ItemType Directory -Force -Path (Split-Path $path -Parent) | Out-Null }
     if (-not (Test-Path $path)) {
