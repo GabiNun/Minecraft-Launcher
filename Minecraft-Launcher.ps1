@@ -9,11 +9,11 @@ Set-Location $env:APPDATA\.minecraft
 irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Microsoft-Login.ps1 | iex
 
 if (-not (Test-Path "client.jar")) {
-    Invoke-WebRequest "https://piston-data.mojang.com/v1/objects/a19d9badbea944a4369fd0059e53bf7286597576/client.jar" -OutFile "client.jar"
+    Invoke-WebRequest "https://piston-data.mojang.com/v1/objects/ce92fd8d1b2460c41ceda07ae7b3fe863a80d045/client.jar" -OutFile "client.jar"
 }
 
-Invoke-WebRequest "https://piston-meta.mojang.com/v1/packages/7db0407a8e9e9a0520b5e3ecba3a3e4650169cd6/26.json" -OutFile "assets\indexes\26.json"
-$json = Invoke-RestMethod "https://piston-meta.mojang.com/v1/packages/db4d7600e0d402a7ba7ad16ce748098f4c704d75/1.21.8.json"
+Invoke-WebRequest "https://piston-meta.mojang.com/v1/packages/54b287c3d38c95875b76be32659649c092fca091/27.json" -OutFile "assets\indexes\27.json"
+$json = Invoke-RestMethod "https://piston-meta.mojang.com/v1/packages/5ec1a8f499396c99b4971eb05658fbcf1545e5d0/1.21.9.json"
 foreach ($lib in $json.libraries) {
     if ($null -ne $lib.downloads.artifact -and $lib.downloads.artifact.url -and $lib.downloads.artifact.path) {
         $dest = Join-Path -Path "libraries" -ChildPath $lib.downloads.artifact.path
@@ -25,7 +25,7 @@ foreach ($lib in $json.libraries) {
     }
 }
 
-$assetIndex = Get-Content "assets\indexes\26.json" | ConvertFrom-Json
+$assetIndex = Get-Content "assets\indexes\27.json" | ConvertFrom-Json
 
 foreach ($entry in $assetIndex.objects.PSObject.Properties) {
     if ($entry.Name -like "minecraft/sounds/*") { continue }
@@ -39,4 +39,4 @@ foreach ($entry in $assetIndex.objects.PSObject.Properties) {
 
 $cp = ((gci -R -Fi *.jar | % { $_.FullName }) -join ";") + ";client.jar"
 
-java -cp $cp net.minecraft.client.main.Main --version 1.21.8 -assetIndex 26 --uuid $login.profile.id --username $login.profile.name --accessToken $login.token
+java -cp $cp net.minecraft.client.main.Main --version 1.21.9 -assetIndex 27 --uuid $login.profile.id --username $login.profile.name --accessToken $login.token
