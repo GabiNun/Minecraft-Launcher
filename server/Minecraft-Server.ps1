@@ -1,9 +1,8 @@
 irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/server/Get-Java.ps1 | iex
 
 if (-not (Test-Path "$env:APPDATA\Minecraft Server")) {
-    md "$env:APPDATA\Minecraft Server" | Out-Null
+    ni "$env:APPDATA\Minecraft Server\eula.txt" -v eula=true
     Set-Location "$env:APPDATA\Minecraft Server"
-    Set-Content eula.txt eula=true
 }
 
 if (-not (Test-Path server.jar)) {
