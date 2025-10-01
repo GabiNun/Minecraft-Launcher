@@ -2,7 +2,7 @@ irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/server/Get-Java.ps
 $ProgressPreference = 'SilentlyContinue'
 
 if (-not (Test-Path "$env:APPDATA\.minecraft")) {
-    ni $env:APPDATA\.minecraft\assets\indexes -I D | Out-Null
+    md $env:APPDATA\.minecraft\assets\indexes | Out-Null
 }
 Set-Location $env:APPDATA\.minecraft
 
