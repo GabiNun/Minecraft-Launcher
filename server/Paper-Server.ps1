@@ -2,8 +2,8 @@ irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/server/Get-Java.ps
 
 if (-not (Test-Path "$env:APPDATA\Minecraft Server")) {
     New-Item "$env:APPDATA\Minecraft Server\eula.txt" -Force -Value "eula=true" | Out-Null
-    Set-Location "$env:APPDATA\Minecraft Server"
 }
+ Set-Location "$env:APPDATA\Minecraft Server"
 
 if (-not (Test-Path server.jar)) {
     $ProgressPreference = 'SilentlyContinue'
