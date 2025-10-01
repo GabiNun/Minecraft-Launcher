@@ -11,4 +11,4 @@ if (-not (Test-Path server.jar)) {
     irm fill-data.papermc.io/v1/objects/9a51088d04ecf56da32834335271122011e3c58d3bf24d8007f476071e390602/paper-1.21.9-37.jar -o server.jar
 }
 
-& java -jar server.jar nogui
+java --enable-native-access=ALL-UNNAMED -jar server.jar nogui
