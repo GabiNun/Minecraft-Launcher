@@ -11,4 +11,4 @@ if (-not (Test-Path server.jar)) {
     irm piston-data.mojang.com/v1/objects/11e54c2081420a4d49db3007e66c80a22579ff2a/server.jar -o server.jar
 }
 
-& java -jar server.jar nogui
+java --enable-native-access=ALL-UNNAMED -jar server.jar nogui
