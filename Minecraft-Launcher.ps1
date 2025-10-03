@@ -26,13 +26,9 @@ foreach ($lib in $json.libraries) {
     if (-not (Test-Path $path)) { Invoke-WebRequest $lib.downloads.artifact.url -OutFile $path }
 }
 
-foreach ($entry in $assetIndex.objects.PSObject.Properties) {
-    if ($entry.Name -match "^(minecraft/sounds/|minecraft/lang/.*\.json)") { continue }
-    $path = "assets\objects\" + $entry.Value.hash.Substring(0,2) + "\" + $entry.Value.hash
-    if (-not (Test-Path (Split-Path $path -Parent))) { New-Item -ItemType Directory -Force -Path (Split-Path $path -Parent) | Out-Null }
-    if (-not (Test-Path $path)) {
-        Invoke-WebRequest ("https://resources.download.minecraft.net/" + $entry.Value.hash.Substring(0,2) + "/" + $entry.Value.hash) -OutFile $path
-    }
+foreach ($key in $assetIndex.objects.PSObject.Properties.Name) {
+    if (-not (Test-Path "assets\objects\$($assetIndex.objects.$key.hash.Substring(0,2))")) { New-Item "assets\objects\$($assetIndex.objects.$key.hash.Substring(0,2))" -ItemType Directory -Force | Out-Null }
+    if (-not (Test-Path "assets\objects\$($assetIndex.objects.$key.hash.Substring(0,2))\$($assetIndex.objects.$key.hash)")) { Invoke-WebRequest "https://resources.download.minecraft.net/$($assetIndex.objects.$key.hash.Substring(0,2))/$($assetIndex.objects.$key.hash)" -OutFile "assets\objects\$($assetIndex.objects.$key.hash.Substring(0,2))\$($assetIndex.objects.$key.hash)" }
 }
 
 $cp = ((gci -R -Fi *.jar | % { $_.FullName }) -join ";") + ";client.jar"
