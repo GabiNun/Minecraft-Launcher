@@ -31,8 +31,7 @@ foreach ($lib in $json.libraries) {
 }
 
 foreach ($entry in $assetIndex.objects.PSObject.Properties) {
-    if ($entry.Name -like "minecraft/sounds/*") { continue }
-    if ($entry.Name -like "minecraft/lang/*.json") { continue }
+    if ($entry.Name -match "^(minecraft/sounds/|minecraft/lang/.*\.json)") { continue }
     $path = "assets\objects\" + $entry.Value.hash.Substring(0,2) + "\" + $entry.Value.hash
     if (-not (Test-Path (Split-Path $path -Parent))) { New-Item -ItemType Directory -Force -Path (Split-Path $path -Parent) | Out-Null }
     if (-not (Test-Path $path)) {
