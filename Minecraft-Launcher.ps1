@@ -27,8 +27,10 @@ foreach ($lib in $json.libraries) {
 }
 
 foreach ($o in $assetIndex.objects.PSObject.Properties.Value) {
-    if (-not (Test-Path "assets\objects\$($o.hash.Substring(0,2))")) { New-Item "assets\objects\$($o.hash.Substring(0,2))" -ItemType Directory -Force | Out-Null }
-    if (-not (Test-Path "assets\objects\$($o.hash.Substring(0,2))\$($o.hash)")) { Invoke-WebRequest "https://resources.download.minecraft.net/$($o.hash.Substring(0,2))/$($o.hash)" -OutFile "assets\objects\$($o.hash.Substring(0,2))\$($o.hash)" }
+    $path = "$dir\$($o.hash)"
+    $dir  = "assets\objects\$($o.hash.Substring(0,2))"
+    if (-not (Test-Path $dir)) { New-Item $dir -ItemType Directory -Force | Out-Null }
+    if (-not (Test-Path $path)) { Invoke-WebRequest "https://resources.download.minecraft.net/$($o.hash.Substring(0,2))/$($o.hash)" -OutFile $path }
 }
 
 $cp = ((gci -R -Fi *.jar | % { $_.FullName }) -join ";") + ";client.jar"
