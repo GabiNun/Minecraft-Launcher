@@ -12,7 +12,10 @@ if (-not (Test-Path "client.jar")) {
     Invoke-WebRequest "https://piston-data.mojang.com/v1/objects/ce92fd8d1b2460c41ceda07ae7b3fe863a80d045/client.jar" -OutFile "client.jar"
 }
 
-Invoke-WebRequest "https://piston-meta.mojang.com/v1/packages/54b287c3d38c95875b76be32659649c092fca091/27.json" -OutFile "assets\indexes\27.json"
+if (-not (Test-Path "assets\indexes\27.json")) {
+    Invoke-WebRequest "https://piston-meta.mojang.com/v1/packages/54b287c3d38c95875b76be32659649c092fca091/27.json" -OutFile "assets\indexes\27.json"
+}
+
 $json = Invoke-RestMethod "https://piston-meta.mojang.com/v1/packages/5ec1a8f499396c99b4971eb05658fbcf1545e5d0/1.21.9.json"
 $assetIndex = Get-Content "assets\indexes\27.json" | ConvertFrom-Json
 
