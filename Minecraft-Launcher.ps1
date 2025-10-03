@@ -22,7 +22,7 @@ $assetIndex = Get-Content "assets\indexes\27.json" | ConvertFrom-Json
 foreach ($lib in $json.libraries) {
     $path = Join-Path "libraries" $lib.downloads.artifact.path
     $folder = Split-Path $path
-    if (-not (Test-Path $folder)) { New-Item -ItemType Directory -Path $folder -Force | Out-Null }
+    if (-not (Test-Path $folder)) { New-Item -ItemType Directory $folder | Out-Null }
     if (-not (Test-Path $path)) { Invoke-WebRequest $lib.downloads.artifact.url -OutFile $path }
 }
 
