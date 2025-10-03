@@ -29,7 +29,7 @@ foreach ($lib in $json.libraries) {
 foreach ($o in $assetIndex.objects.PSObject.Properties.Value) {
     $path = "$dir\$($o.hash)"
     $dir  = "assets\objects\$($o.hash.Substring(0,2))"
-    if (-not (Test-Path $dir)) { New-Item $dir -ItemType Directory -Force | Out-Null }
+    if (-not (Test-Path $dir)) { New-Item $dir -ItemType Directory | Out-Null }
     if (-not (Test-Path $path)) { Invoke-WebRequest "https://resources.download.minecraft.net/$($o.hash.Substring(0,2))/$($o.hash)" -OutFile $path }
 }
 
