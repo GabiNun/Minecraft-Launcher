@@ -26,9 +26,9 @@ foreach ($lib in $json.libraries) {
     if (-not (Test-Path $path)) { Invoke-WebRequest $lib.downloads.artifact.url -OutFile $path }
 }
 
-foreach ($key in $assetIndex.objects.PSObject.Properties.Name) {
-    if (-not (Test-Path "assets\objects\$($assetIndex.objects.$key.hash.Substring(0,2))")) { New-Item "assets\objects\$($assetIndex.objects.$key.hash.Substring(0,2))" -ItemType Directory -Force | Out-Null }
-    if (-not (Test-Path "assets\objects\$($assetIndex.objects.$key.hash.Substring(0,2))\$($assetIndex.objects.$key.hash)")) { Invoke-WebRequest "https://resources.download.minecraft.net/$($assetIndex.objects.$key.hash.Substring(0,2))/$($assetIndex.objects.$key.hash)" -OutFile "assets\objects\$($assetIndex.objects.$key.hash.Substring(0,2))\$($assetIndex.objects.$key.hash)" }
+foreach ($o in $assetIndex.objects.PSObject.Properties.Value) {
+    if (-not (Test-Path "assets\objects\$($o.hash.Substring(0,2))")) { New-Item "assets\objects\$($o.hash.Substring(0,2))" -ItemType Directory -Force | Out-Null }
+    if (-not (Test-Path "assets\objects\$($o.hash.Substring(0,2))\$($o.hash)")) { Invoke-WebRequest "https://resources.download.minecraft.net/$($o.hash.Substring(0,2))/$($o.hash)" -OutFile "assets\objects\$($o.hash.Substring(0,2))\$($o.hash)" }
 }
 
 $cp = ((gci -R -Fi *.jar | % { $_.FullName }) -join ";") + ";client.jar"
