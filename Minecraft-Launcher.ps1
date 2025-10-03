@@ -14,6 +14,8 @@ if (-not (Test-Path "client.jar")) {
 
 Invoke-WebRequest "https://piston-meta.mojang.com/v1/packages/54b287c3d38c95875b76be32659649c092fca091/27.json" -OutFile "assets\indexes\27.json"
 $json = Invoke-RestMethod "https://piston-meta.mojang.com/v1/packages/5ec1a8f499396c99b4971eb05658fbcf1545e5d0/1.21.9.json"
+$assetIndex = Get-Content "assets\indexes\27.json" | ConvertFrom-Json
+
 foreach ($lib in $json.libraries) {
     if ($null -ne $lib.downloads.artifact -and $lib.downloads.artifact.url -and $lib.downloads.artifact.path) {
         $dest = Join-Path -Path "libraries" -ChildPath $lib.downloads.artifact.path
@@ -24,8 +26,6 @@ foreach ($lib in $json.libraries) {
         Invoke-WebRequest $lib.downloads.artifact.url -OutFile $dest
     }
 }
-
-$assetIndex = Get-Content "assets\indexes\27.json" | ConvertFrom-Json
 
 foreach ($entry in $assetIndex.objects.PSObject.Properties) {
     if ($entry.Name -like "minecraft/sounds/*") { continue }
