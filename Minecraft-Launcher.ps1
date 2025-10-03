@@ -26,11 +26,12 @@ foreach ($lib in $json.libraries) {
     if (-not (Test-Path $path)) { Invoke-WebRequest $lib.downloads.artifact.url -OutFile $path }
 }
 
-foreach ($o in $assetIndex.objects.PSObject.Properties.Value) {
-    $path = "$dir\$($o.hash)"
-    $dir  = "assets\objects\$($o.hash.Substring(0,2))"
+foreach ($prop in $assetIndex.objects.PSObject.Properties) {
+    if ($prop.Name -match "^minecraft/(sounds|lang)/") { continue }
+    $dir  = "assets\objects\$($prop.Value.hash.Substring(0,2))"
+    $path = "$dir\$($prop.Value.hash)"
     if (-not (Test-Path $dir)) { New-Item -ItemType Directory $dir | Out-Null }
-    if (-not (Test-Path $path)) { Invoke-WebRequest "https://resources.download.minecraft.net/$($o.hash.Substring(0,2))/$($o.hash)" -OutFile $path }
+    if (-not (Test-Path $path)) { Invoke-WebRequest "https://resources.download.minecraft.net/$($prop.Value.hash.Substring(0,2))/$($prop.Value.hash)" -OutFile $path }
 }
 
 $cp = ((gci -R -Fi *.jar | % { $_.FullName }) -join ";") + ";client.jar"
