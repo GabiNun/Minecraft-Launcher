@@ -3,3 +3,4 @@ if (-not (gcm java -Ea 0)) {
     winget install --id Oracle.JDK.25 -e
     $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
 }
+#test
