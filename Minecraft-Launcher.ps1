@@ -36,4 +36,4 @@ foreach ($prop in $assetIndex.objects.PSObject.Properties) {
 
 $cp = ((gci -R -Fi *.jar | % { $_.FullName }) -join ";") + ";client.jar"
 
-java --enable-native-access=ALL-UNNAMED -cp $cp net.minecraft.client.main.Main --version 1.21.9 -assetIndex 27 --uuid $login.profile.id --username $login.profile.name --accessToken $login.token
+java -cp $cp net.minecraft.client.main.Main --version 1.21.9 -assetIndex 27 --uuid $login.profile.id --username $login.profile.name --accessToken $login.token
