@@ -4,6 +4,7 @@ $ProgressPreference = 'SilentlyContinue'
 if (-not (Test-Path $env:APPDATA\.minecraft)) {
     New-Item -ItemType Directory $env:APPDATA\.minecraft\assets\indexes | Out-Null
 }
+
 Set-Location $env:APPDATA\.minecraft
 
 irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Microsoft-Login.ps1 | iex
