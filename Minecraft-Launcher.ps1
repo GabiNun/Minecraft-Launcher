@@ -1,18 +1,18 @@
 irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/server/Get-Java.ps1 | iex
 $ProgressPreference = 'SilentlyContinue'
 
-if (-not (Test-Path "$env:APPDATA\.minecraft")) {
+if (-not (Test-Path $env:APPDATA\.minecraft)) {
     New-Item -ItemType Directory $env:APPDATA\.minecraft\assets\indexes | Out-Null
 }
 Set-Location $env:APPDATA\.minecraft
 
 irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Microsoft-Login.ps1 | iex
 
-if (-not (Test-Path "client.jar")) {
+if (-not (Test-Path client.jar)) {
     Invoke-WebRequest "https://piston-data.mojang.com/v1/objects/ce92fd8d1b2460c41ceda07ae7b3fe863a80d045/client.jar" -OutFile "client.jar"
 }
 
-if (-not (Test-Path "assets\indexes\27.json")) {
+if (-not (Test-Path assets\indexes\27.json)) {
     Invoke-WebRequest "https://piston-meta.mojang.com/v1/packages/54b287c3d38c95875b76be32659649c092fca091/27.json" -OutFile "assets\indexes\27.json"
 }
 
