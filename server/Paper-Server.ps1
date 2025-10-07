@@ -7,7 +7,7 @@ if (-not (Test-Path "$env:APPDATA\Minecraft Server")) {
 
 if (-not (Test-Path server.jar)) {
     $ProgressPreference = 'SilentlyContinue'
-    irm fill-data.papermc.io/v1/objects/3787df5df3c4b0d38d06da66f4b296cd119f10a2067a267119010d06f8dfab0e/paper-1.21.9-58.jar -OutFile server
+    irm fill-data.papermc.io/v1/objects/aec002e77c7566e49494fdf05430b96078ffd1d7430e652d4f338fef951e7a10/paper-1.21.9-59.jar -OutFile server
 }
 
 java -jar server nogui
