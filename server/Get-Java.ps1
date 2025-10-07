@@ -1,5 +1,4 @@
 if (-not (gcm java -Ea 0)) {
-    Write-Host "Java not found. Installing Java"
-    winget install --id Oracle.JDK.25 -e
+    winget install Oracle.JDK.25
     $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
 }
