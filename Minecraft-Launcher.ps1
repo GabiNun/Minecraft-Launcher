@@ -1,4 +1,4 @@
-irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/server/Get-Java.ps1 | iex
+irm github.com/GabiNun/Minecraft-Launcher/raw/main/server/Get-Java.ps1 | iex
 $ProgressPreference = 'SilentlyContinue'
 
 if (-not (Test-Path $env:APPDATA\.minecraft)) {
@@ -6,7 +6,7 @@ if (-not (Test-Path $env:APPDATA\.minecraft)) {
 }
 Set-Location $env:APPDATA\.minecraft
 
-irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/Microsoft-Login.ps1 | iex
+irm github.com/GabiNun/Minecraft-Launcher/raw/main/Microsoft-Login.ps1 | iex
 
 if (-not (Test-Path client.jar)) {
     Invoke-WebRequest "https://piston-data.mojang.com/v1/objects/d3bdf582a7fa723ce199f3665588dcfe6bf9aca8/client.jar" -OutFile "client.jar"
