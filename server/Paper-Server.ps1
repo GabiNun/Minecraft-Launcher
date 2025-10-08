@@ -1,4 +1,4 @@
-irm raw.githubusercontent.com/GabiNun/Minecraft-Launcher/main/server/Get-Java.ps1 | iex
+irm github.com/GabiNun/Minecraft-Launcher/raw/main/server/Get-Java.ps1 | iex
 New-Item "$env:APPDATA\Minecraft Server\eula.txt" -Force -Value "eula=true" | Out-Null
 Set-Location "$env:APPDATA\Minecraft Server"
 
