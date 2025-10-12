@@ -1,3 +1,0 @@
-$release = (Invoke-RestMethod 'https://launchermeta.mojang.com/mc/game/version_manifest.json').versions | ? type -eq 'release' | select -First 1 | % url
-
-$client = (Invoke-RestMethod $release).downloads.client.url
