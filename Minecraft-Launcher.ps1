@@ -1,5 +1,5 @@
 irm github.com/GabiNun/Minecraft-Launcher/raw/main/server/Get-Java.ps1 | iex
-$ProgressPreference = 'SilentlyContinue'
+$ProgressPreference = 0
 
 if (-not (Test-Path $env:APPDATA\.minecraft)) {
     New-Item -ItemType Directory $env:APPDATA\.minecraft\assets\indexes | Out-Null
