@@ -3,7 +3,7 @@ New-Item "$env:APPDATA\Minecraft Server\eula.txt" -Force -Value "eula=true" | Ou
 Set-Location "$env:APPDATA\Minecraft Server"
 
 if (-not (Test-Path server.jar)) {
-    $ProgressPreference = 'SilentlyContinue'
+    $ProgressPreference = 0
     irm piston-data.mojang.com/v1/objects/95495a7f485eedd84ce928cef5e223b757d2f764/server.jar -OutFile server
 }
 
