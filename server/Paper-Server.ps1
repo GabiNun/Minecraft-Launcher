@@ -4,7 +4,7 @@ Set-Location "$env:APPDATA\Minecraft Server"
 
 if (-not (Test-Path server.jar)) {
     $ProgressPreference = 0
-    irm fill-data.papermc.io/v1/objects/764ea594261bfe4902c775994f122ba26a1d25b9cc61705867637b751950cd56/paper-1.21.10-89.jar -Out server
+    irm fill-data.papermc.io/v1/objects/f6d8d80d25a687cc52a02a1d04cb25f167bb3a8a828271a263be2f44ada912cc/paper-1.21.10-91.jar -Out server
 }
 
 java -jar server nogui
